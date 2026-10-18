@@ -4,9 +4,6 @@
    Typography: Playfair Display + Inter + Nirmala UI / Bengali Font
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600&display=swap');
-@import url('https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.min.css');
-
 :root {
   /* Brand Palette */
   --primary: #791A2C;
@@ -1017,65 +1014,6 @@ h1, h2, h3, h4, h5, h6 {
   background: #fff;
 }
 
-/* Floating WhatsApp Button on bottom left */
-.whatsapp-floating-widget {
-  position: fixed;
-  bottom: 24px;
-  left: 24px;
-  z-index: 990;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-}
-
-.whatsapp-floating-btn {
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  background: #25D366;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30px;
-  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  position: relative;
-}
-
-.whatsapp-floating-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 8px 28px rgba(37, 211, 102, 0.6);
-}
-
-.whatsapp-floating-btn::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  border: 2px solid #25D366;
-  animation: pulseGreen 2s infinite;
-}
-
-.whatsapp-floating-tooltip {
-  background: #0F172A;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  white-space: nowrap;
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .whatsapp-floating-tooltip {
-    display: block;
-  }
-}
-
 /* ── Showroom Trust Strip ── */
 .showroom-trust-strip {
   background: #fff;
@@ -1944,6 +1882,11 @@ h1, h2, h3, h4, h5, h6 {
   transform: scale(1.1);
 }
 
+/* Keep older homepage markup from rendering a second floating WhatsApp link. */
+.whatsapp-floating-widget {
+  display: none !important;
+}
+
 .chat-float {
   position: fixed;
   bottom: 80px;
@@ -2365,6 +2308,310 @@ h1, h2, h3, h4, h5, h6 {
 .status-shipped { background: #EDE9FE; color: #6D28D9; }
 .status-delivered { background: var(--success-bg); color: var(--success); }
 .status-cancelled { background: var(--danger-bg); color: var(--danger); }
+
+/* Boutique polish: lightweight motion, clear focus, and comfortable touch targets. */
+:root {
+  --bg: #faf9f7;
+  --paper-2: #f7f4f2;
+  --border: #e9e4e1;
+  --shadow-md: 0 12px 30px rgba(15, 23, 42, 0.09);
+  --accent: #791a2c;
+  --accent-hover: #5e1322;
+  --accent-deep: #42101b;
+  --accent-wash: #f8ecee;
+  --accent-line: #e9c8ce;
+}
+
+html {
+  scroll-padding-top: calc(var(--head-h) + 16px);
+}
+
+::selection {
+  background: rgba(121, 26, 44, 0.16);
+  color: var(--navy);
+}
+
+:focus-visible {
+  outline: 3px solid rgba(121, 26, 44, 0.55);
+  outline-offset: 3px;
+}
+
+.ox-header {
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom-color: rgba(226, 218, 214, 0.8);
+  transition: background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.ox-header.is-stuck {
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.pc-topbar {
+  padding: 7px 0;
+  background: #261c1e;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pc-topbar-inner {
+  min-height: 20px;
+}
+
+.pc-topbar-left,
+.pc-topbar-center,
+.pc-topbar-right {
+  font-size: 10px;
+  letter-spacing: 0.045em;
+}
+
+.ox-mainhead {
+  padding: 17px 0;
+}
+
+.ox-logo-title {
+  letter-spacing: 0.075em;
+}
+
+.ox-logo-sub {
+  color: var(--primary);
+}
+
+.ox-nav {
+  border-top-color: #f0ece9;
+}
+
+.ox-nav-list {
+  justify-content: space-between;
+  gap: clamp(14px, 2vw, 28px);
+}
+
+.ox-nav-item a {
+  padding: 13px 0 12px;
+  font-size: 12.5px;
+  letter-spacing: 0.005em;
+}
+
+.ox-action-icon-wrap {
+  border-radius: 10px;
+}
+
+.ox-menu-trigger {
+  border-color: #e7dfe0;
+  border-radius: 10px;
+}
+
+.ox-menu-trigger:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.sw-hero-10 {
+  min-height: clamp(500px, 54vw, 680px);
+  background: #f4efeb;
+}
+
+.sw-hero-overlay {
+  background: linear-gradient(
+    90deg,
+    rgba(250, 248, 246, 0.99) 0%,
+    rgba(250, 248, 246, 0.97) 30%,
+    rgba(250, 248, 246, 0.82) 43%,
+    rgba(250, 248, 246, 0.42) 56%,
+    rgba(250, 248, 246, 0.08) 72%,
+    transparent 100%
+  );
+}
+
+.sw-hero-bg-img {
+  object-position: 68% center;
+}
+
+.sw-hero-content {
+  max-width: 600px;
+  padding-top: 68px;
+  padding-bottom: 76px;
+}
+
+.sw-hero-badge {
+  border-color: rgba(121, 26, 44, 0.13);
+  color: var(--primary);
+  letter-spacing: 0.1em;
+}
+
+.sw-hero-bg-img {
+  animation: hero-image-enter 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.sw-hero-content > * {
+  animation: hero-content-enter 650ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.sw-hero-content > :nth-child(2) { animation-delay: 80ms; }
+.sw-hero-content > :nth-child(3) { animation-delay: 150ms; }
+.sw-hero-content > :nth-child(4) { animation-delay: 220ms; }
+.sw-hero-content > :nth-child(5) { animation-delay: 290ms; }
+
+@keyframes hero-image-enter {
+  from { transform: scale(1.035); }
+  to { transform: scale(1); }
+}
+
+@keyframes hero-content-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sw-hero-title {
+  letter-spacing: -0.035em;
+}
+
+.sw-hero-title em {
+  color: var(--primary);
+}
+
+.sw-hero-lead {
+  color: #4e4a49;
+}
+
+.btn-hero-primary {
+  background: var(--primary);
+  box-shadow: 0 8px 22px rgba(121, 26, 44, 0.22);
+}
+
+.btn-hero-primary:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 12px 26px rgba(121, 26, 44, 0.28);
+}
+
+.sw-hero-pill,
+.btn,
+.btn-hero-primary,
+.btn-hero-secondary,
+.ox-action-btn,
+.ox-user-avatar-btn {
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease,
+    box-shadow 180ms ease, transform 180ms ease;
+}
+
+.sw-card {
+  border-color: #ebe6e2;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.025);
+}
+
+.product-grid > .sw-card {
+  animation: card-enter 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.product-grid > .sw-card:nth-child(2) { animation-delay: 45ms; }
+.product-grid > .sw-card:nth-child(3) { animation-delay: 90ms; }
+.product-grid > .sw-card:nth-child(4) { animation-delay: 135ms; }
+
+@keyframes card-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.sw-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+}
+
+.sw-card-media img {
+  backface-visibility: hidden;
+}
+
+.sw-card-quick {
+  background: rgba(255, 255, 255, 0.97);
+}
+
+.showroom-trust-card {
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.showroom-trust-card:hover {
+  transform: translateY(-2px);
+}
+
+.sec-pad {
+  padding-top: clamp(44px, 6vw, 72px);
+  padding-bottom: clamp(44px, 6vw, 72px);
+}
+
+.brand-marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@media (hover: none) {
+  .sw-card-quick {
+    position: relative;
+    transform: none;
+    opacity: 1;
+    border-top: 0;
+    padding: 0 12px 12px;
+    background: #fff;
+  }
+
+  .sw-card:hover,
+  .showroom-trust-card:hover {
+    transform: none;
+  }
+
+  .sw-card:hover .sw-card-media img {
+    transform: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .ox-mainhead {
+    padding: 12px 0;
+  }
+
+  .pc-topbar-inner {
+    justify-content: center;
+  }
+
+  .pc-topbar-center {
+    display: none;
+  }
+
+  .ox-nav-list {
+    justify-content: flex-start;
+  }
+
+  .sw-hero-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(250, 248, 246, 0.97) 0%,
+      rgba(250, 248, 246, 0.92) 54%,
+      rgba(250, 248, 246, 0.66) 100%
+    );
+  }
+
+  .sw-hero-10 {
+    min-height: 600px;
+  }
+
+  .sw-hero-content {
+    padding: 52px 0;
+  }
+
+  .sec-head {
+    margin-bottom: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 /* Switch Toggle */
 .switch {

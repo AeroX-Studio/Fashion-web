@@ -11,6 +11,7 @@ import { WhatsAppButton } from '@/components/store/WhatsAppButton';
 import { LiveChatWidget } from '@/components/store/LiveChatWidget';
 
 export const metadata = {
+  metadataBase: new URL('https://nobofashion.com'),
   title: "Nobo Fashion — Women's Fashion & Three-Piece in Bangladesh",
   description:
     'Shop Nobo Fashion for premium three-piece, gowns, sarees and unstitched dresses. 100% authentic, cash on delivery, fast nationwide delivery across Bangladesh.',
@@ -55,28 +56,6 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <Providers>
-          {/* Top Bar */}
-          <div className="pc-topbar">
-            <div className="container pc-topbar-inner">
-              <div className="pc-topbar-left">
-                <div className="pc-topbar-promo">
-                  <span>COD Available</span> Cash on delivery nationwide across Bangladesh
-                </div>
-              </div>
-              <div className="pc-topbar-right">
-                <a href="tel:09638044440">
-                  <i className="ri-phone-line"></i> 09638-044440
-                </a>
-                <span>|</span>
-                <a href="https://wa.me/8801800033223" target="_blank" rel="noopener noreferrer">
-                  <i className="ri-whatsapp-line"></i> WhatsApp
-                </a>
-                <span>|</span>
-                <span className="text-muted">Shop # 6, Uttara Square, Dhaka</span>
-              </div>
-            </div>
-          </div>
-
           {/* Main Header */}
           <Header />
 

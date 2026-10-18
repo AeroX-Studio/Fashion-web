@@ -81,6 +81,8 @@ export default async function HomePage() {
             src="/api/images/hero-boutique.jpg"
             alt="Nobo Fashion Luxury Showroom Uttara"
             className="sw-hero-bg-img"
+            fetchPriority="high"
+            decoding="async"
           />
         </div>
 
@@ -449,19 +451,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── 11. Floating WhatsApp Button (Bottom Left) ── */}
-      <a
-        href="https://wa.me/8801800033223?text=Hi%20Nobo%20Fashion!%20I%20want%20to%20know%20about%20your%20latest%20three-piece%20collection."
-        target="_blank"
-        rel="noopener noreferrer"
-        className="whatsapp-floating-widget"
-        title="Chat on WhatsApp with Uttara Staff"
-      >
-        <div className="whatsapp-floating-btn">
-          <i className="ri-whatsapp-fill"></i>
-        </div>
-        <span className="whatsapp-floating-tooltip">Chat with Counter Staff</span>
-      </a>
     </div>
   );
 }
