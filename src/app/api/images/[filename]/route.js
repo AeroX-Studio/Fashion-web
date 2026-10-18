@@ -13,6 +13,8 @@ const MIME_MAP = {
   '.bmp': 'image/bmp',
 };
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req, { params }) {
   try {
     const rawFilename = params?.filename || '';
