@@ -98,7 +98,10 @@ async function seed() {
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456';
   const hashedPassword = bcrypt.hashSync(adminPassword, 10);
 
-  const existingAdmin = get('SELECT id FROM users WHERE email = ?', [adminEmail]);
+  const existingAdmin = get(
+    "SELECT id FROM users WHERE email = ? AND user_type = 'admin' LIMIT 1",
+    [adminEmail]
+  ) || get("SELECT id FROM users WHERE user_type = 'admin' ORDER BY id ASC LIMIT 1");
   if (!existingAdmin) {
     run(
       `INSERT INTO users (name, email, phone, password_hash, role_id, user_type, status)
@@ -185,7 +188,7 @@ async function seed() {
       'Shop Nobo Fashion for premium three-piece, gowns, sarees and unstitched dresses. 100% authentic, cash on delivery, fast nationwide delivery across Bangladesh.',
     store_phone: '09638-044440, 09639-774962',
     store_phone_complaints: '01800033220',
-    store_email: 'info@priyocollectionbd.com',
+    store_email: 'info@nobofashion.com',
     store_address:
       'Shop # 6, Basement, Uttara Square Shopping Mall, Sonargaon Janapath, Sector 13, Uttara, Dhaka',
     store_whatsapp: '8801800033223',
@@ -393,7 +396,7 @@ async function seed() {
       ],
     },
     {
-      name: 'Priyo Made LP-01',
+      name: 'Nobo Fashion LP-01',
       slug: 'priyo-made-lp-01',
       category_slug: 'ladies-parts',
       sku: 'PRY-LP025B',

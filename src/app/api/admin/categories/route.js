@@ -8,6 +8,11 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     await initDatabase();
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.userType !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const categories = all(`
       SELECT c.*, COUNT(p.id) AS product_count
       FROM categories c
@@ -32,16 +37,22 @@ export async function POST(req) {
     }
 
     const { name, slug, image, description, show_in_sidebar, show_in_header, show_on_homepage, sort_order } = await req.json();
+    const cleanName = typeof name === 'string' ? name.trim() : '';
 
-    if (!name || !name.trim()) {
+    if (!cleanName) {
       return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
     }
 
-    const generatedSlug = (slug || name)
+    const generatedSlug = (typeof slug === 'string' && slug.trim() ? slug : cleanName)
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .replace(/^-+|-+$/g, '') || `category-${Date.now()}`;
+
+    const cleanSortOrder = Number(sort_order || 0);
+    if (!Number.isFinite(cleanSortOrder)) {
+      return NextResponse.json({ error: 'Sort order must be a number.' }, { status: 400 });
+    }
 
     const existing = get('SELECT id FROM categories WHERE slug = ?', [generatedSlug]);
     if (existing) {
@@ -52,14 +63,14 @@ export async function POST(req) {
       `INSERT INTO categories (name, slug, image, description, show_in_sidebar, show_in_header, show_on_homepage, sort_order, is_active)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
       [
-        name.trim(),
+        cleanName,
         generatedSlug,
         image || null,
         description || null,
         show_in_sidebar ? 1 : 0,
         show_in_header ? 1 : 0,
         show_on_homepage ? 1 : 0,
-        sort_order || 0,
+        cleanSortOrder,
       ]
     );
 
@@ -82,8 +93,9 @@ export async function PATCH(req) {
     }
 
     const { id, field, value } = await req.json();
+    const categoryId = Number(id);
 
-    if (!id || !field) {
+    if (!Number.isInteger(categoryId) || categoryId <= 0 || !field) {
       return NextResponse.json({ error: 'Missing id or field' }, { status: 400 });
     }
 
@@ -94,7 +106,20 @@ export async function PATCH(req) {
     }
 
 
-    run(`UPDATE categories SET ${field} = ? WHERE id = ?`, [value, id]);
+    const category = get('SELECT id FROM categories WHERE id = ?', [categoryId]);
+    if (!category) {
+      return NextResponse.json({ error: 'Category not found.' }, { status: 404 });
+    }
+    const cleanValue = ['show_in_sidebar', 'show_in_header', 'show_on_homepage', 'is_active'].includes(field)
+      ? (value ? 1 : 0)
+      : field === 'sort_order'
+        ? Number(value)
+        : typeof value === 'string' ? value.trim() : null;
+    if (field === 'sort_order' && !Number.isFinite(cleanValue)) {
+      return NextResponse.json({ error: 'Sort order must be a number.' }, { status: 400 });
+    }
+
+    run(`UPDATE categories SET ${field} = ? WHERE id = ?`, [cleanValue, categoryId]);
     saveImmediately();
 
     return NextResponse.json({ success: true });
@@ -113,10 +138,14 @@ export async function DELETE(req) {
     }
 
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+    const id = Number(searchParams.get('id'));
 
-    if (!id) {
+    if (!Number.isInteger(id) || id <= 0) {
       return NextResponse.json({ error: 'Category ID is required' }, { status: 400 });
+    }
+
+    if (!get('SELECT id FROM categories WHERE id = ?', [id])) {
+      return NextResponse.json({ error: 'Category not found.' }, { status: 404 });
     }
 
     run('DELETE FROM categories WHERE id = ?', [id]);

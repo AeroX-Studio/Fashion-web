@@ -62,7 +62,7 @@ export default async function CategoryPage({ params, searchParams }) {
         <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
           <Link href="/">Home</Link> &gt; <Link href="/shop">Shop</Link> &gt; <span>{category.name}</span>
         </div>
-        <h1 style={{ fontSize: '32px', color: 'var(--navy)' }}>{category.name}</h1>
+        <h1 className="shop-page-title" style={{ fontSize: '32px', color: 'var(--navy)' }}>{category.name}</h1>
         <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
           {category.description || `Showing ${products.length} exclusive pieces in ${category.name}`}
         </p>
@@ -108,7 +108,7 @@ export default async function CategoryPage({ params, searchParams }) {
               </Link>
             </div>
           ) : (
-            <div className="product-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+            <div className="product-grid shop-product-grid">
               {products.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}

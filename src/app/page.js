@@ -193,7 +193,7 @@ export default async function HomePage() {
       {/* ── 3. Brand Marquee Strip ── */}
       <div className="brand-marquee">
         <div className="marquee-track">
-          <span className="marquee-item">★ NOBO FASHION</span>
+          <span className="marquee-item">★ Nobo Fashion</span>
           <span className="marquee-item">PAKISTANI LAWN</span>
           <span className="marquee-item">BIN HAMEED INSPIRED</span>
           <span className="marquee-item">AGHA NOOR 2 PIECE</span>
@@ -201,7 +201,7 @@ export default async function HomePage() {
           <span className="marquee-item">HANDLOOM BATIK</span>
           <span className="marquee-item">LADIES LUXURY CLUTCHES</span>
           <span className="marquee-item">CASH ON DELIVERY NATIONWIDE</span>
-          <span className="marquee-item">★ NOBO FASHION</span>
+          <span className="marquee-item">★ Nobo Fashion</span>
           <span className="marquee-item">PAKISTANI LAWN</span>
           <span className="marquee-item">BIN HAMEED INSPIRED</span>
         </div>

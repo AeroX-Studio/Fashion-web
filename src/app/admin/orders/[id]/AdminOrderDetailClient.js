@@ -24,6 +24,7 @@ export function AdminOrderDetailClient({ order, items, invoice, timeline, custom
     { key: 'delivered', label: '7. Delivered Successfully' },
     { key: 'cancelled', label: 'X. Cancelled' },
     { key: 'returned', label: 'R. Returned' },
+    { key: 'refunded', label: 'Refunded' },
   ];
 
   const handleUpdateStatus = async (e) => {

@@ -8,6 +8,7 @@ export default function AdminInventoryPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterLow, setFilterLow] = useState(false);
+  const [feedback, setFeedback] = useState('');
 
   const fetchProducts = async () => {
     try {
@@ -37,16 +38,22 @@ export default function AdminInventoryPage() {
       });
 
       if (res.ok) {
-        fetchProducts();
+        setFeedback('Inventory updated.');
+        await fetchProducts();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setFeedback(data.error || 'Could not update inventory.');
       }
     } catch (e) {
       console.error(e);
+      setFeedback('Could not update inventory. Check your connection and try again.');
     }
   };
 
+  const activeProducts = products.filter((product) => product.is_active);
   const displayedProducts = filterLow
-    ? products.filter((p) => p.stock <= (p.low_stock_threshold || 5))
-    : products;
+    ? activeProducts.filter((p) => p.stock <= (p.low_stock_threshold || 5))
+    : activeProducts;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -66,6 +73,12 @@ export default function AdminInventoryPage() {
           <i className="ri-alarm-warning-line"></i> {filterLow ? 'Showing Low Stock Only' : 'Show Low Stock Only'}
         </button>
       </div>
+
+      {feedback && (
+        <div role="status" style={{ padding: '10px 14px', borderRadius: '8px', background: 'var(--paper-2)', color: 'var(--navy)', fontSize: '13px' }}>
+          {feedback}
+        </div>
+      )}
 
       <div className="data-card">
         <div className="data-card-header">
@@ -128,7 +141,7 @@ export default function AdminInventoryPage() {
                       {/* Variant Stock Adjuster Pills */}
                       <td>
                         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                          {(p.variants || []).map((v) => (
+                          {(p.variants || []).filter((variant) => variant.is_active).map((v) => (
                             <div
                               key={v.id || v.size_name}
                               style={{
@@ -188,6 +201,13 @@ export default function AdminInventoryPage() {
                               </div>
                             </div>
                           ))}
+                          {!(p.variants || []).some((variant) => variant.is_active) && (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 8px', border: '1px solid var(--border)', borderRadius: '6px', background: '#fff' }}>
+                              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--navy)' }}>General stock: <strong>{p.stock}</strong></span>
+                              <button type="button" className="ox-icon-btn" style={{ width: '24px', height: '24px', border: '1px solid var(--border)' }} onClick={() => handleAdjust(p.id, null, -1)} aria-label={`Decrease ${p.name} stock`} title="Decrease 1">−</button>
+                              <button type="button" className="ox-icon-btn" style={{ width: '24px', height: '24px', border: '1px solid var(--border)' }} onClick={() => handleAdjust(p.id, null, 1)} aria-label={`Increase ${p.name} stock`} title="Increase 1">+</button>
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>

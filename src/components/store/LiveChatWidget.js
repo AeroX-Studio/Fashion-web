@@ -19,6 +19,16 @@ export function LiveChatWidget() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const messagesEndRef = useRef(null);
+  const conversationIdRef = useRef(null);
+  const isOpenRef = useRef(false);
+
+  useEffect(() => {
+    conversationIdRef.current = conversationId;
+  }, [conversationId]);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
 
   // Initialize guest info from localStorage
   useEffect(() => {
@@ -41,45 +51,68 @@ export function LiveChatWidget() {
 
   // Connect to Socket.IO
   useEffect(() => {
-    socket = io({
+    if (session?.user?.userType === 'admin') return undefined;
+
+    const chatSocket = io({
       path: '/api/socketio',
       transports: ['websocket', 'polling'],
+      auth: { guestPhone },
+    });
+    socket = chatSocket;
+
+    chatSocket.on('connect', () => {
+      chatSocket.emit('user:online');
+      if (conversationIdRef.current) {
+        chatSocket.emit('conversation:join', conversationIdRef.current);
+      }
     });
 
-    socket.on('connect', () => {
-      console.log('Connected to chat server');
-      const userId = session?.user?.id || guestPhone || 'guest';
-      socket.emit('user:online', { userId, userType: 'customer' });
-    });
-
-    socket.on('message:new', (msg) => {
-      setMessages((prev) => [...prev, msg]);
-      if (!isOpen && msg.sender_type === 'admin') {
+    chatSocket.on('message:new', (msg) => {
+      if (String(msg.conversation_id) !== String(conversationIdRef.current)) return;
+      setMessages((prev) => {
+        const pendingIndex = prev.findIndex((item) => String(item.id).startsWith('temp-') && item.message === msg.message && item.sender_type === msg.sender_type);
+        if (pendingIndex >= 0) {
+          const next = [...prev];
+          next[pendingIndex] = msg;
+          return next;
+        }
+        return prev.some((item) => String(item.id) === String(msg.id)) ? prev : [...prev, msg];
+      });
+      if (!isOpenRef.current && msg.sender_type === 'admin') {
         setUnreadCount((prev) => prev + 1);
       }
     });
 
-    socket.on('typing:show', (data) => {
+    chatSocket.on('typing:show', (data) => {
       if (data.userType === 'admin') {
         setIsTyping(true);
       }
     });
 
-    socket.on('typing:stop', (data) => {
+    chatSocket.on('typing:stop', (data) => {
       if (data.userType === 'admin') {
         setIsTyping(false);
       }
     });
 
     return () => {
-      if (socket) socket.disconnect();
+      chatSocket.disconnect();
+      if (socket === chatSocket) socket = null;
     };
-  }, [session, guestPhone, isOpen]);
+  }, [session?.user?.id, session?.user?.userType, guestPhone]);
+
+  useEffect(() => {
+    if (isOpen && conversationId && socket?.connected) {
+      socket.emit('conversation:join', conversationId);
+    }
+  }, [conversationId, isOpen]);
 
   // Load chat history
   useEffect(() => {
     if (isOpen && conversationId) {
-      fetch(`/api/chat/messages?conversationId=${conversationId}`)
+      const params = new URLSearchParams({ conversationId });
+      if (!session?.user?.id && guestPhone) params.set('guestPhone', guestPhone);
+      fetch(`/api/chat/messages?${params.toString()}`)
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {
@@ -89,7 +122,7 @@ export function LiveChatWidget() {
         .catch(console.error);
       setUnreadCount(0);
     }
-  }, [isOpen, conversationId]);
+  }, [isOpen, conversationId, guestPhone, session?.user?.id]);
 
   // Scroll to bottom
   useEffect(() => {
@@ -148,23 +181,36 @@ export function LiveChatWidget() {
         }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.conversationId && !conversationId) {
-          setConversationId(data.conversationId);
-          localStorage.setItem('nobo_conv_id', data.conversationId);
-        }
-        if (socket) {
-          socket.emit('message:send', {
-            conversationId: data.conversationId || conversationId,
-            message: data.message || newMsg,
-          });
-        }
+      const data = await res.json();
+      if (!res.ok) {
+        setMessages((prev) => prev.filter((item) => item.id !== newMsg.id));
+        setInputText(msgText);
+        window.alert(data.error || 'Unable to send your message. Please try again.');
+        return;
+      }
+
+      setMessages((prev) => prev.map((item) => item.id === newMsg.id ? data.message : item));
+      if (data.conversationId && !conversationId) {
+        setConversationId(data.conversationId);
+        localStorage.setItem('nobo_conv_id', data.conversationId);
+      }
+      if (socket) {
+        socket.emit('user:online');
+        socket.emit('conversation:join', data.conversationId || conversationId);
+        socket.emit('message:send', {
+          conversationId: data.conversationId || conversationId,
+          message: data.message || newMsg,
+        });
       }
     } catch (err) {
       console.error('Failed to send message', err);
+      setMessages((prev) => prev.filter((item) => item.id !== newMsg.id));
+      setInputText(msgText);
+      window.alert('Unable to send your message. Please check your connection and try again.');
     }
   };
+
+  if (session?.user?.userType === 'admin') return null;
 
   return (
     <>

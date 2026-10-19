@@ -108,7 +108,7 @@ export default function NewProductPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...productData,
-          stock: totalStock || productData.stock,
+          stock: totalStock,
           variants,
         }),
       });

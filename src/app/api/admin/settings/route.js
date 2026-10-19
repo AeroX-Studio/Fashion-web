@@ -8,6 +8,11 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     await initDatabase();
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.userType !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const rows = all('SELECT key, value FROM settings');
     const settingsMap = {};
     rows.forEach((r) => {

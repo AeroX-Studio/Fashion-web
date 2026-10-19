@@ -28,18 +28,7 @@ export default async function AdminLayout({ children }) {
       <aside className="admin-sidebar">
         <div className="admin-logo">
           <Link href="/admin" className="ox-logo" style={{ textDecoration: 'none' }}>
-            <div className="ox-logo-brand">
-              <span className="ox-logo-mark">
-                <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
-                  <rect width="40" height="40" rx="8" fill="#791A2C" />
-                  <path d="M12 28V12H16.5L23.5 23.5V12H28V28H23.5L16.5 16.5V28H12Z" fill="#FFF" />
-                </svg>
-              </span>
-              <div className="ox-logo-text-group">
-                <span className="ox-logo-title" style={{ fontSize: '15px' }}>NOBO</span>
-                <span className="ox-logo-sub" style={{ fontSize: '11px' }}>Fashion</span>
-              </div>
-            </div>
+            <Image src="/logo.jpg" alt="Nobo Fashion" width={56} height={56} className="ox-logo-image ox-admin-brand-image" />
           </Link>
           <span style={{ fontSize: '10px', background: 'var(--primary)', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>
             ADMIN

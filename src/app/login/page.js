@@ -9,7 +9,11 @@ import { signIn } from 'next-auth/react';
 function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const requestedCallback = searchParams.get('callbackUrl') || '/';
+  const callbackUrl = requestedCallback.startsWith('/') && !requestedCallback.startsWith('//') && !requestedCallback.includes('\\')
+    ? requestedCallback
+    : '/';
+  const isAdminLogin = callbackUrl.startsWith('/admin');
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -50,13 +54,15 @@ function LoginFormContent() {
           <Image
             src="/logo.jpg"
             alt="Nobo Fashion"
-            width={160}
-            height={44}
-            style={{ height: '38px', width: 'auto', margin: '0 auto 12px', objectFit: 'contain' }}
+            width={120}
+            height={120}
+            className="auth-brand-image"
           />
-          <h1 style={{ fontSize: '22px', color: 'var(--navy)' }}>Sign In to Your Account</h1>
+          <h1 style={{ fontSize: '22px', color: 'var(--navy)' }}>{isAdminLogin ? 'Admin Sign In' : 'Sign In to Your Account'}</h1>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-            Track your orders, view invoices and manage your wishlist.
+            {isAdminLogin
+              ? 'Sign in to the Nobo Fashion Management Console.'
+              : 'Track your orders, view invoices and manage your wishlist.'}
           </p>
         </div>
 
@@ -136,12 +142,6 @@ function LoginFormContent() {
           </Link>
         </div>
 
-        {/* Demo Admin Quick Login Helper */}
-        <div style={{ marginTop: '20px', padding: '12px', background: 'var(--paper-2)', borderRadius: '8px', fontSize: '11.5px', color: 'var(--text-muted)' }}>
-          <strong>Demo Admin Login:</strong>
-          <div>Email: <code>admin@priyocollection.com</code></div>
-          <div>Password: <code>admin123456</code></div>
-        </div>
       </div>
     </div>
   );

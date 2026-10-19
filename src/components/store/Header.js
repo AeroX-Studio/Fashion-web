@@ -100,20 +100,16 @@ export function Header() {
       <header className={`ox-header ${isStuck ? 'is-stuck' : ''}`}>
         <div className="ox-mainhead">
           <div className="container ox-mainhead-wrap">
-            {/* Brand Logo & Monogram */}
-            <Link href="/" className="ox-logo" title="Nobo Fashion">
-              <div className="ox-logo-brand">
-                <span className="ox-logo-mark">
-                  <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
-                    <rect width="40" height="40" rx="8" fill="#791A2C" />
-                    <path d="M12 28V12H16.5L23.5 23.5V12H28V28H23.5L16.5 16.5V28H12Z" fill="#FFF" />
-                  </svg>
-                </span>
-                <div className="ox-logo-text-group">
-                  <span className="ox-logo-title">NOBO</span>
-                  <span className="ox-logo-sub">Fashion</span>
-                </div>
-              </div>
+            {/* Nobo Fashion brand mark */}
+            <Link href="/" className="ox-logo" aria-label="Nobo Fashion home">
+              <Image
+                src="/logo.jpg"
+                alt="Nobo Fashion"
+                width={72}
+                height={72}
+                priority
+                className="ox-logo-image"
+              />
             </Link>
 
             {/* Centered Luxury Capsule Search */}
@@ -331,10 +327,9 @@ export function Header() {
         <div className="ox-drawer-overlay" onClick={() => setMobileMenuOpen(false)}>
           <div className="ox-drawer-panel" onClick={(e) => e.stopPropagation()}>
             <div className="ox-drawer-head">
-              <div className="ox-drawer-logo">
-                <span className="ox-logo-title">NOBO</span>
-                <span className="ox-logo-sub">Fashion</span>
-              </div>
+              <Link href="/" className="ox-drawer-logo" aria-label="Nobo Fashion home" onClick={() => setMobileMenuOpen(false)}>
+                <Image src="/logo.jpg" alt="Nobo Fashion" width={96} height={96} className="ox-logo-image ox-drawer-brand-image" />
+              </Link>
               <button
                 type="button"
                 className="ox-drawer-close"

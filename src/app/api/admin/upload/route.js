@@ -52,7 +52,7 @@ export async function POST(req) {
       .substring(0, 25);
     
     const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-    const filename = `${originalBase || 'priyo'}-${uniqueSuffix}.${ext}`;
+    const filename = `${originalBase || 'nobo-fashion'}-${uniqueSuffix}.${ext}`;
     const filePath = path.join(uploadDir, filename);
 
     // Save to disk in data/images

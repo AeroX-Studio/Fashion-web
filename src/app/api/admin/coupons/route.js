@@ -8,6 +8,11 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     await initDatabase();
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.userType !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const coupons = all('SELECT * FROM coupons ORDER BY id DESC');
     return NextResponse.json(coupons);
   } catch (err) {
@@ -26,11 +31,30 @@ export async function POST(req) {
 
     const { code, discountType, discountValue, minOrderAmount, maxDiscount, expiryDate } = await req.json();
 
-    if (!code || !discountValue) {
+    const numericDiscount = Number(discountValue);
+    const numericMinimum = Number(minOrderAmount || 0);
+    const numericMaximum = maxDiscount === '' || maxDiscount === null || maxDiscount === undefined
+      ? null
+      : Number(maxDiscount);
+    const normalizedType = discountType || 'percentage';
+
+    if (!code || !String(code).trim() || !Number.isFinite(numericDiscount) || numericDiscount <= 0) {
       return NextResponse.json({ error: 'Coupon code and discount value are required' }, { status: 400 });
     }
+    if (!['percentage', 'fixed'].includes(normalizedType)) {
+      return NextResponse.json({ error: 'Discount type must be percentage or fixed.' }, { status: 400 });
+    }
+    if (normalizedType === 'percentage' && numericDiscount > 100) {
+      return NextResponse.json({ error: 'Percentage discount cannot exceed 100%.' }, { status: 400 });
+    }
+    if (!Number.isFinite(numericMinimum) || numericMinimum < 0) {
+      return NextResponse.json({ error: 'Minimum order value must be zero or greater.' }, { status: 400 });
+    }
+    if (numericMaximum !== null && (!Number.isFinite(numericMaximum) || numericMaximum < 0)) {
+      return NextResponse.json({ error: 'Maximum discount must be zero or greater.' }, { status: 400 });
+    }
 
-    const cleanCode = code.toUpperCase().trim();
+    const cleanCode = String(code).toUpperCase().trim().replace(/\s+/g, '');
     const existing = get('SELECT id FROM coupons WHERE code = ?', [cleanCode]);
     if (existing) {
       return NextResponse.json({ error: 'A coupon with this code already exists.' }, { status: 400 });
@@ -41,10 +65,10 @@ export async function POST(req) {
        VALUES (?, ?, ?, ?, ?, ?, 1)`,
       [
         cleanCode,
-        discountType || 'percentage',
-        Number(discountValue),
-        minOrderAmount ? Number(minOrderAmount) : 0,
-        maxDiscount ? Number(maxDiscount) : null,
+        normalizedType,
+        numericDiscount,
+        numericMinimum,
+        numericMaximum,
         expiryDate || null,
       ]
     );

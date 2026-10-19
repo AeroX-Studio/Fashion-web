@@ -92,7 +92,7 @@ export function EditProductClient({ product, categories }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          stock: totalStock || formData.stock,
+          stock: totalStock,
           variants,
         }),
       });

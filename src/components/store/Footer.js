@@ -12,19 +12,8 @@ export function Footer() {
           {/* Col 1: Brand & Contact Info */}
           <div>
             <div style={{ marginBottom: '18px' }}>
-              <Link href="/" className="ox-logo" style={{ textDecoration: 'none' }}>
-                <div className="ox-logo-brand">
-                  <span className="ox-logo-mark">
-                    <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
-                      <rect width="40" height="40" rx="8" fill="#791A2C" />
-                      <path d="M12 28V12H16.5L23.5 23.5V12H28V28H23.5L16.5 16.5V28H12Z" fill="#FFF" />
-                    </svg>
-                  </span>
-                  <div className="ox-logo-text-group">
-                    <span className="ox-logo-title">NOBO</span>
-                    <span className="ox-logo-sub">Fashion</span>
-                  </div>
-                </div>
+              <Link href="/" className="ox-logo" aria-label="Nobo Fashion home">
+                <Image src="/logo.jpg" alt="Nobo Fashion" width={96} height={96} className="ox-logo-image ox-footer-brand-image" />
               </Link>
             </div>
             <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginBottom: '18px', lineHeight: 1.6 }}>

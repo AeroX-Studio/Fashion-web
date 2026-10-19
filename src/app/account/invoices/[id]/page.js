@@ -77,9 +77,9 @@ export default async function InvoiceDetailPage({ params }) {
             <Image
               src="/logo.jpg"
               alt="Nobo Fashion"
-              width={160}
-              height={44}
-              style={{ height: '42px', width: 'auto', objectFit: 'contain', marginBottom: '8px' }}
+              width={100}
+              height={100}
+              style={{ height: '76px', width: '76px', objectFit: 'contain', marginBottom: '8px' }}
             />
             <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
               Shop # 6, Basement, Uttara Square Shopping Mall,<br />

@@ -1,6 +1,10 @@
 const { createServer } = require('http');
 const next = require('next');
 const { Server } = require('socket.io');
+const { getToken } = require('next-auth/jwt');
+const { initDatabase, get } = require('./src/lib/db');
+
+const AUTH_SECRET = process.env.NEXTAUTH_SECRET || 'priyo-collection-secret-key-change-in-production-2026';
 
 if (process.argv.includes('--production')) {
   process.env.NODE_ENV = 'production';
@@ -63,6 +67,45 @@ app.prepare().then(() => {
     path: '/api/socketio',
   });
 
+  io.use(async (socket, nextSocket) => {
+    try {
+      const token = await getToken({ req: socket.request, secret: AUTH_SECRET });
+      if (token?.userType) {
+        socket.data.userId = Number(token.id);
+        socket.data.userType = token.userType;
+      } else {
+        const guestPhone = String(socket.handshake.auth?.guestPhone || '').trim();
+        socket.data.guestPhone = guestPhone;
+        socket.data.userType = guestPhone ? 'customer' : 'guest';
+      }
+    } catch (error) {
+      socket.data.userType = 'guest';
+    }
+    nextSocket();
+  });
+
+  async function canAccessConversation(socket, conversationId) {
+    if (socket.data.userType === 'admin') return true;
+    if (socket.data.userType !== 'customer') return false;
+
+    await initDatabase();
+    const conversation = get('SELECT user_id FROM conversations WHERE id = ?', [conversationId]);
+    if (!conversation) return false;
+    if (socket.data.userId && Number(conversation.user_id) === Number(socket.data.userId)) return true;
+
+    if (socket.data.guestPhone) {
+      const owner = get(
+        "SELECT id FROM users WHERE id = ? AND phone = ? AND user_type = 'customer'",
+        [conversation.user_id, socket.data.guestPhone]
+      );
+      if (owner) {
+        socket.data.userId = Number(owner.id);
+        return true;
+      }
+    }
+    return false;
+  }
+
   // Track online users
   const onlineUsers = new Map();
 
@@ -70,8 +113,16 @@ app.prepare().then(() => {
     console.log(`[Socket.IO] Client connected: ${socket.id}`);
 
     // User comes online
-    socket.on('user:online', (data) => {
-      const { userId, userType } = data;
+    socket.on('user:online', async () => {
+      if (!socket.data.userId && socket.data.guestPhone) {
+        await initDatabase();
+        const user = get("SELECT id FROM users WHERE phone = ? AND user_type = 'customer' AND status = 'active'", [socket.data.guestPhone]);
+        if (user) socket.data.userId = Number(user.id);
+      }
+
+      const userId = socket.data.userId;
+      const userType = socket.data.userType;
+      if (!userId || !['customer', 'admin'].includes(userType)) return;
       onlineUsers.set(userId, { socketId: socket.id, userType, userId });
       socket.userId = userId;
       socket.userType = userType;
@@ -93,12 +144,14 @@ app.prepare().then(() => {
 
     // Admin joins admin room
     socket.on('admin:join', () => {
-      socket.join('admins');
+      if (socket.data.userType === 'admin') socket.join('admins');
     });
 
     // Join conversation room
-    socket.on('conversation:join', (conversationId) => {
-      socket.join(`conversation:${conversationId}`);
+    socket.on('conversation:join', async (conversationId) => {
+      if (await canAccessConversation(socket, conversationId)) {
+        socket.join(`conversation:${conversationId}`);
+      }
     });
 
     // Leave conversation room
@@ -107,8 +160,9 @@ app.prepare().then(() => {
     });
 
     // New message
-    socket.on('message:send', (data) => {
-      const { conversationId, message } = data;
+    socket.on('message:send', async (data) => {
+      const { conversationId, message } = data || {};
+      if (!message || message.sender_type !== socket.data.userType || !(await canAccessConversation(socket, conversationId))) return;
       // Broadcast to everyone in the conversation room
       io.to(`conversation:${conversationId}`).emit('message:new', message);
       // Also notify admins
@@ -121,37 +175,40 @@ app.prepare().then(() => {
     });
 
     // Typing indicator
-    socket.on('typing:start', (data) => {
-      const { conversationId, userId, userType } = data;
+    socket.on('typing:start', async (data) => {
+      const { conversationId } = data || {};
+      if (!(await canAccessConversation(socket, conversationId))) return;
       socket.to(`conversation:${conversationId}`).emit('typing:show', {
-        userId,
-        userType,
+        userId: socket.data.userId,
+        userType: socket.data.userType,
       });
     });
 
-    socket.on('typing:stop', (data) => {
-      const { conversationId, userId, userType } = data;
-      socket.to(`conversation:${conversationId}`).emit('typing:hide', {
-        userId,
-        userType,
+    socket.on('typing:stop', async (data) => {
+      const { conversationId } = data || {};
+      if (!(await canAccessConversation(socket, conversationId))) return;
+      socket.to(`conversation:${conversationId}`).emit('typing:stop', {
+        userId: socket.data.userId,
+        userType: socket.data.userType,
       });
     });
 
     // Message read
-    socket.on('message:read', (data) => {
-      const { conversationId, userId } = data;
+    socket.on('message:read', async (data) => {
+      const { conversationId } = data || {};
+      if (!(await canAccessConversation(socket, conversationId))) return;
       io.to(`conversation:${conversationId}`).emit('message:read', {
         conversationId,
-        readBy: userId,
+        readBy: socket.data.userId,
       });
     });
 
     // Disconnect
     socket.on('disconnect', () => {
-      if (socket.userId) {
-        onlineUsers.delete(socket.userId);
-        if (socket.userType === 'customer') {
-          io.to('admins').emit('customer:offline', { userId: socket.userId });
+      if (socket.data.userId) {
+        onlineUsers.delete(socket.data.userId);
+        if (socket.data.userType === 'customer') {
+          io.to('admins').emit('customer:offline', { userId: socket.data.userId });
         }
         const customers = Array.from(onlineUsers.values())
           .filter((u) => u.userType === 'customer')

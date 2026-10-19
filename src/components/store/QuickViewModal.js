@@ -49,6 +49,7 @@ export function QuickViewModal() {
 
   return (
     <div
+      className="quick-view-overlay"
       style={{
         position: 'fixed',
         inset: 0,
@@ -63,6 +64,7 @@ export function QuickViewModal() {
       onClick={closeQuickView}
     >
       <div
+        className="quick-view-panel"
         style={{
           background: '#fff',
           borderRadius: '16px',

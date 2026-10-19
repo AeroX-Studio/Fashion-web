@@ -41,12 +41,12 @@ export default function AdminProductsPage() {
   }, []);
 
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete "${name}"?`)) return;
+    if (!window.confirm(`Archive "${name}"? It will be hidden from the storefront while its order history is preserved.`)) return;
 
     try {
       const res = await fetch(`/api/admin/products?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
-        setProducts((prev) => prev.filter((p) => p.id !== id));
+        setProducts((prev) => prev.map((product) => product.id === id ? { ...product, is_active: 0 } : product));
       } else {
         alert('Failed to delete product.');
       }
@@ -254,9 +254,10 @@ export default function AdminProductsPage() {
                         <button
                           type="button"
                           onClick={() => handleDelete(p.id, p.name)}
+                          disabled={!p.is_active}
                           className="ox-icon-btn"
-                          style={{ width: '32px', height: '32px', border: '1px solid var(--border)' }}
-                          title="Delete product"
+                          style={{ width: '32px', height: '32px', border: '1px solid var(--border)', opacity: p.is_active ? 1 : 0.45, cursor: p.is_active ? 'pointer' : 'not-allowed' }}
+                          title={p.is_active ? 'Archive product' : 'Product already archived'}
                         >
                           <i className="ri-delete-bin-line" style={{ color: 'var(--danger)', fontSize: '14px' }}></i>
                         </button>

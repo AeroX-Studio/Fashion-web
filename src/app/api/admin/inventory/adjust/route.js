@@ -13,40 +13,58 @@ export async function POST(req) {
 
     const { productId, variantId, delta } = await req.json();
 
-    if (!productId || delta === undefined) {
+    const cleanProductId = Number(productId);
+    const adjustment = Number(delta);
+    if (!Number.isInteger(cleanProductId) || cleanProductId <= 0 || !Number.isInteger(adjustment) || adjustment === 0) {
       return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
     }
 
+    const product = get('SELECT id, stock FROM products WHERE id = ?', [cleanProductId]);
+    if (!product) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
     if (variantId) {
-      const v = get('SELECT stock FROM product_variants WHERE id = ?', [variantId]);
-      const prevStock = v ? v.stock : 0;
-      const newStock = Math.max(0, prevStock + Number(delta));
+      const variant = get('SELECT id, stock FROM product_variants WHERE id = ? AND product_id = ? AND is_active = 1', [variantId, cleanProductId]);
+      if (!variant) {
+        return NextResponse.json({ error: 'Product size was not found' }, { status: 404 });
+      }
+
+      const prevStock = Number(variant.stock) || 0;
+      const newStock = Math.max(0, prevStock + adjustment);
+      const appliedAdjustment = newStock - prevStock;
+      if (appliedAdjustment === 0) {
+        return NextResponse.json({ error: 'Stock is already zero.' }, { status: 409 });
+      }
 
       run('UPDATE product_variants SET stock = ? WHERE id = ?', [newStock, variantId]);
-      run('UPDATE products SET stock = MAX(0, stock + ?) WHERE id = ?', [delta, productId]);
+      run('UPDATE products SET stock = MAX(0, stock + ?) WHERE id = ?', [appliedAdjustment, cleanProductId]);
 
       insert(
         `INSERT INTO inventory_logs (product_id, variant_id, adjustment, previous_stock, new_stock, reason, admin_id)
          VALUES (?, ?, ?, ?, ?, 'Manual Admin Adjustment', ?)`,
-        [productId, variantId, delta, prevStock, newStock, session.user.id]
+        [cleanProductId, variantId, appliedAdjustment, prevStock, newStock, session.user.id]
       );
     } else {
-      const p = get('SELECT stock FROM products WHERE id = ?', [productId]);
-      const prevStock = p ? p.stock : 0;
-      const newStock = Math.max(0, prevStock + Number(delta));
+      const prevStock = Number(product.stock) || 0;
+      const newStock = Math.max(0, prevStock + adjustment);
+      const appliedAdjustment = newStock - prevStock;
+      if (appliedAdjustment === 0) {
+        return NextResponse.json({ error: 'Stock is already zero.' }, { status: 409 });
+      }
 
-      run('UPDATE products SET stock = ? WHERE id = ?', [newStock, productId]);
+      run('UPDATE products SET stock = ? WHERE id = ?', [newStock, cleanProductId]);
 
       insert(
         `INSERT INTO inventory_logs (product_id, adjustment, previous_stock, new_stock, reason, admin_id)
          VALUES (?, ?, ?, ?, 'Manual Admin Adjustment', ?)`,
-        [productId, delta, prevStock, newStock, session.user.id]
+        [cleanProductId, appliedAdjustment, prevStock, newStock, session.user.id]
       );
     }
 
     saveImmediately();
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, productId: cleanProductId });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: 'Failed to adjust stock' }, { status: 500 });

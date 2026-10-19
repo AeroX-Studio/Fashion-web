@@ -18,14 +18,29 @@ function hashPassword(plainPassword) {
 function authenticateUser(identifier, password) {
   if (!identifier || !password) return null;
 
+  const normalizedIdentifier = identifier.toLowerCase().trim();
+
   // Search by email or phone
-  const user = get(
+  let user = get(
     `SELECT u.*, r.name AS role_name
      FROM users u
      LEFT JOIN roles r ON u.role_id = r.id
      WHERE (u.email = ? OR u.phone = ?) AND u.status = 'active'`,
-    [identifier.toLowerCase().trim(), identifier.trim()]
+    [normalizedIdentifier, identifier.trim()]
   );
+
+  // Preserve access to the existing Super Admin when the configured admin
+  // email has changed since the local database was seeded.
+  const configuredAdminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
+  if (!user && configuredAdminEmail && normalizedIdentifier === configuredAdminEmail) {
+    user = get(
+      `SELECT u.*, r.name AS role_name
+       FROM users u
+       JOIN roles r ON u.role_id = r.id
+       WHERE u.user_type = 'admin' AND u.status = 'active' AND r.name = 'Super Admin'
+       ORDER BY u.id ASC LIMIT 1`
+    );
+  }
 
   if (!user) return null;
 

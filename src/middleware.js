@@ -14,7 +14,7 @@ export async function middleware(req) {
     if (!token || token.userType !== 'admin') {
       const url = req.nextUrl.clone();
       url.pathname = '/login';
-      url.searchParams.set('callbackUrl', encodeURI(req.url));
+      url.searchParams.set('callbackUrl', `${pathname}${req.nextUrl.search}`);
       return NextResponse.redirect(url);
     }
   }
@@ -29,7 +29,7 @@ export async function middleware(req) {
     if (!token) {
       const url = req.nextUrl.clone();
       url.pathname = '/login';
-      url.searchParams.set('callbackUrl', encodeURI(req.url));
+      url.searchParams.set('callbackUrl', `${pathname}${req.nextUrl.search}`);
       return NextResponse.redirect(url);
     }
   }

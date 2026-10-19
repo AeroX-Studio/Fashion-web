@@ -1,14 +1,6 @@
 import './globals.css';
 import { Providers } from '@/components/Providers';
-import { Header } from '@/components/store/Header';
-import { Footer } from '@/components/store/Footer';
-import { MobileNav } from '@/components/store/MobileNav';
-import { CartDrawer } from '@/components/store/CartDrawer';
-import { WishlistDrawer } from '@/components/store/WishlistDrawer';
-import { QuickViewModal } from '@/components/store/QuickViewModal';
-import { SizeChartModal } from '@/components/store/SizeChartModal';
-import { WhatsAppButton } from '@/components/store/WhatsAppButton';
-import { LiveChatWidget } from '@/components/store/LiveChatWidget';
+import { AppShell } from '@/components/AppShell';
 
 export const metadata = {
   metadataBase: new URL('https://nobofashion.com'),
@@ -16,9 +8,9 @@ export const metadata = {
   description:
     'Shop Nobo Fashion for premium three-piece, gowns, sarees and unstitched dresses. 100% authentic, cash on delivery, fast nationwide delivery across Bangladesh.',
   icons: {
-    icon: '/logo.jpg',
-    shortcut: '/logo.jpg',
-    apple: '/logo.jpg',
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
   },
   openGraph: {
     title: "Nobo Fashion — Women's Fashion & Three-Piece in Bangladesh",
@@ -29,8 +21,8 @@ export const metadata = {
     images: [
       {
         url: '/logo.jpg',
-        width: 800,
-        height: 600,
+        width: 592,
+        height: 592,
         alt: 'Nobo Fashion',
       },
     ],
@@ -56,27 +48,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <Providers>
-          {/* Main Header */}
-          <Header />
-
-          {/* Page Content */}
-          <main style={{ flex: 1 }}>{children}</main>
-
-          {/* Footer */}
-          <Footer />
-
-          {/* Mobile Bottom Navigation */}
-          <MobileNav />
-
-          {/* Drawers & Modals */}
-          <CartDrawer />
-          <WishlistDrawer />
-          <QuickViewModal />
-          <SizeChartModal />
-
-          {/* Floating Action Buttons */}
-          <WhatsAppButton />
-          <LiveChatWidget />
+          <AppShell>{children}</AppShell>
         </Providers>
       </body>
     </html>

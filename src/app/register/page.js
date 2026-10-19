@@ -90,9 +90,9 @@ function RegisterFormContent() {
           <Image
             src="/logo.jpg"
             alt="Nobo Fashion"
-            width={160}
-            height={44}
-            style={{ height: '38px', width: 'auto', margin: '0 auto 12px', objectFit: 'contain' }}
+            width={120}
+            height={120}
+            className="auth-brand-image"
           />
           <h1 style={{ fontSize: '22px', color: 'var(--navy)' }}>Create an Account</h1>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>

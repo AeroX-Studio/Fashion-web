@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import io from 'socket.io-client';
 
@@ -18,62 +18,91 @@ export default function AdminChatPage() {
   const [onlineCustomers, setOnlineCustomers] = useState([]);
 
   const messagesEndRef = useRef(null);
+  const selectedConvRef = useRef(null);
+  const joinedConversationRef = useRef(null);
+
+  useEffect(() => {
+    selectedConvRef.current = selectedConv;
+  }, [selectedConv]);
 
   // Fetch all conversations
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/chat/conversations');
       const data = await res.json();
       if (Array.isArray(data)) {
         setConversations(data);
-        if (!selectedConv && data.length > 0) {
-          setSelectedConv(data[0]);
-        }
+        setSelectedConv((current) => current || data[0] || null);
       }
     } catch (e) {
       console.error(e);
     }
-  };
+  }, []);
 
   // Connect socket
   useEffect(() => {
-    socket = io({
+    const chatSocket = io({
       path: '/api/socketio',
       transports: ['websocket', 'polling'],
     });
+    socket = chatSocket;
 
-    socket.on('connect', () => {
-      socket.emit('admin:join');
+    chatSocket.on('connect', () => {
+      chatSocket.emit('admin:join');
+      if (joinedConversationRef.current) {
+        chatSocket.emit('conversation:join', joinedConversationRef.current);
+      }
     });
 
-    socket.on('conversation:updated', (data) => {
+    chatSocket.on('conversation:updated', () => {
       fetchConversations();
     });
 
-    socket.on('message:new', (msg) => {
-      if (selectedConv && String(msg.conversation_id) === String(selectedConv.id)) {
-        setMessages((prev) => [...prev, msg]);
+    chatSocket.on('message:new', (msg) => {
+      if (selectedConvRef.current && String(msg.conversation_id) === String(selectedConvRef.current.id)) {
+        setMessages((prev) => {
+          const pendingIndex = prev.findIndex((item) => String(item.id).startsWith('temp-') && item.message === msg.message && item.sender_type === msg.sender_type);
+          if (pendingIndex >= 0) {
+            const next = [...prev];
+            next[pendingIndex] = msg;
+            return next;
+          }
+          return prev.some((item) => String(item.id) === String(msg.id)) ? prev : [...prev, msg];
+        });
       }
       fetchConversations();
     });
 
-    socket.on('online:customers', (ids) => {
+    chatSocket.on('online:customers', (ids) => {
       setOnlineCustomers(ids);
     });
 
     fetchConversations();
 
     return () => {
-      if (socket) socket.disconnect();
+      chatSocket.disconnect();
+      if (socket === chatSocket) socket = null;
     };
-  }, [selectedConv]);
+  }, [fetchConversations]);
 
   // Load messages & customer context for selected conversation
   useEffect(() => {
     if (selectedConv) {
+      setMessages([]);
+      setCustomerContext(null);
+      if (socket?.connected && joinedConversationRef.current && String(joinedConversationRef.current) !== String(selectedConv.id)) {
+        socket.emit('conversation:leave', joinedConversationRef.current);
+      }
+      joinedConversationRef.current = selectedConv.id;
       if (socket) {
         socket.emit('conversation:join', selectedConv.id);
       }
+
+      fetch('/api/admin/chat/conversations', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId: selectedConv.id }),
+      }).then(() => fetchConversations()).catch(console.error);
 
       fetch(`/api/chat/messages?conversationId=${selectedConv.id}`)
         .then((r) => r.json())
@@ -89,8 +118,11 @@ export default function AdminChatPage() {
           .then((data) => setCustomerContext(data))
           .catch(() => setCustomerContext(null));
       }
+    } else {
+      setMessages([]);
+      setCustomerContext(null);
     }
-  }, [selectedConv]);
+  }, [selectedConv, fetchConversations]);
 
   // Scroll to bottom
   useEffect(() => {
@@ -124,21 +156,29 @@ export default function AdminChatPage() {
         body: JSON.stringify({
           conversationId: selectedConv.id,
           message: text,
-          senderType: 'admin',
         }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (socket) {
-          socket.emit('message:send', {
-            conversationId: selectedConv.id,
-            message: data.message || newMsg,
-          });
-        }
+      const data = await res.json();
+      if (!res.ok) {
+        setMessages((prev) => prev.filter((item) => item.id !== newMsg.id));
+        setInputText(text);
+        window.alert(data.error || 'Message could not be sent.');
+        return;
+      }
+
+      setMessages((prev) => prev.map((item) => item.id === newMsg.id ? data.message : item));
+      if (socket) {
+        socket.emit('message:send', {
+          conversationId: selectedConv.id,
+          message: data.message || newMsg,
+        });
       }
     } catch (err) {
       console.error(err);
+      setMessages((prev) => prev.filter((item) => item.id !== newMsg.id));
+      setInputText(text);
+      window.alert('Message could not be sent. Please try again.');
     }
   };
 

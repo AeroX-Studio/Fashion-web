@@ -23,6 +23,7 @@ export default function AccountLayout({ children }) {
   return (
     <div className="container sec-pad">
       <div
+        className="account-layout-grid"
         style={{
           display: 'grid',
           gridTemplateColumns: '260px 1fr',
@@ -31,7 +32,7 @@ export default function AccountLayout({ children }) {
         }}
       >
         {/* Account Sidebar */}
-        <aside className="data-card" style={{ padding: '20px' }}>
+        <aside className="data-card account-sidebar" style={{ padding: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border)' }}>
             <div
               style={{

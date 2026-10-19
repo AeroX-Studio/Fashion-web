@@ -113,7 +113,7 @@ export default async function ShopPage({ searchParams }) {
           {data.currentCategory && <span> &gt; {data.currentCategory.name}</span>}
           {data.q && <span> &gt; Search: &quot;{data.q}&quot;</span>}
         </div>
-        <h1 style={{ fontSize: '28px', color: 'var(--navy)' }}>
+        <h1 className="shop-page-title" style={{ fontSize: '28px', color: 'var(--navy)' }}>
           {data.currentCategory ? data.currentCategory.name : data.q ? `Search results for "${data.q}"` : 'All Products'}
         </h1>
         <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
@@ -150,7 +150,7 @@ export default async function ShopPage({ searchParams }) {
           <div className="sidebar-title" style={{ marginTop: '16px' }}>
             <i className="ri-ruler-line"></i> Filter by Size
           </div>
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '24px' }}>
+          <div className="shop-size-filters" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '24px' }}>
             <Link
               href={`/shop?${new URLSearchParams({ ...searchParams, size: '' }).toString()}`}
               className={`sw-size-chip ${!data.size ? 'selected' : ''}`}
@@ -223,7 +223,7 @@ export default async function ShopPage({ searchParams }) {
               </Link>
             </div>
           ) : (
-            <div className="product-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+            <div className="product-grid shop-product-grid">
               {data.products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
