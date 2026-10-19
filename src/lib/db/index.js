@@ -3,15 +3,19 @@
 // ============================================================================
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { SCHEMA } = require('./schema');
 
-const DB_DIR = path.join(process.cwd(), 'data');
+const DB_DIR = process.env.VERCEL === '1'
+  ? path.join(os.tmpdir(), 'nobo-fashion')
+  : path.join(process.cwd(), 'data');
 const DB_PATH = path.join(DB_DIR, 'priyo.sqlite');
 const IMAGES_DIR = path.join(DB_DIR, 'images');
 
 let dbInstance = null;
 let SQL = null;
 let saveTimeout = null;
+let initPromise = null;
 
 // Ensure database and images directories exist
 if (!fs.existsSync(DB_DIR)) {
@@ -57,28 +61,45 @@ function saveImmediately() {
 
 // Robust loader for sql.js in Node / Next.js
 async function initDatabase() {
+  if (initPromise) return initPromise;
   if (dbInstance) return dbInstance;
 
-  try {
+  initPromise = (async () => {
     if (!SQL) {
       // Use standard require
       const initSqlJs = require('sql.js');
       SQL = await initSqlJs();
     }
 
-    if (fs.existsSync(DB_PATH)) {
+    const isNewDatabase = !fs.existsSync(DB_PATH);
+    if (!isNewDatabase) {
       const fileBuffer = fs.readFileSync(DB_PATH);
       dbInstance = new SQL.Database(fileBuffer);
     } else {
       dbInstance = new SQL.Database();
       dbInstance.run(SCHEMA);
+    }
+
+    if (process.env.VERCEL === '1' && !get('SELECT id FROM products LIMIT 1')) {
+      const { seed } = require('./seed');
+      await seed({ bootstrap: true, initialized: true });
+    }
+
+    if (isNewDatabase) {
       persistDb();
     }
 
     return dbInstance;
+  })();
+
+  try {
+    return await initPromise;
   } catch (err) {
     console.error('Database init error:', err);
+    dbInstance = null;
     throw err;
+  } finally {
+    initPromise = null;
   }
 }
 
@@ -152,8 +173,13 @@ function exec(sql) {
   scheduleSave();
 }
 
+function getImagesDir() {
+  return IMAGES_DIR;
+}
+
 module.exports = {
   initDatabase,
+  getImagesDir,
   getDb,
   all,
   get,

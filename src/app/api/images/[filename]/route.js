@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { getImagesDir } from '@/lib/db';
 
 const MIME_MAP = {
   '.jpg': 'image/jpeg',
@@ -27,7 +28,7 @@ export async function GET(req, { params }) {
 
     // Prevent path traversal
     const safeFilename = path.basename(decodedFilename);
-    const imagesDir = path.resolve(process.cwd(), 'data', 'images');
+    const imagesDir = path.resolve(getImagesDir());
     const filePath = path.resolve(imagesDir, safeFilename);
 
     // Security check: ensure path stays within data/images

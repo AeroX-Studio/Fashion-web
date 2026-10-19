@@ -6,9 +6,9 @@ const bcrypt = require('bcryptjs');
 const { initDatabase, getDb, run, insert, get, all, exec, saveImmediately } = require('./index');
 const { SCHEMA } = require('./schema');
 
-async function seed() {
+async function seed({ bootstrap = false, initialized = false } = {}) {
   console.log('🌱 Initializing Nobo Fashion database...\n');
-  await initDatabase();
+  if (!initialized) await initDatabase();
 
   const db = getDb();
   // Ensure schema is up to date
@@ -96,21 +96,22 @@ async function seed() {
   // ── Admin User ──
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@priyocollection.com';
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456';
-  const hashedPassword = bcrypt.hashSync(adminPassword, 10);
 
   const existingAdmin = get(
     "SELECT id FROM users WHERE email = ? AND user_type = 'admin' LIMIT 1",
     [adminEmail]
   ) || get("SELECT id FROM users WHERE user_type = 'admin' ORDER BY id ASC LIMIT 1");
-  if (!existingAdmin) {
+  const canCreateAdmin = !bootstrap || Boolean(process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD);
+  if (!existingAdmin && canCreateAdmin) {
+    const hashedPassword = bcrypt.hashSync(adminPassword, 10);
     run(
       `INSERT INTO users (name, email, phone, password_hash, role_id, user_type, status)
        VALUES (?, ?, ?, ?, ?, 'admin', 'active')`,
       ['Admin', adminEmail, '09638044440', hashedPassword, superAdminRole ? superAdminRole.id : null]
     );
-    console.log(`✅ Admin user created: ${adminEmail}`);
-  } else {
-    console.log(`⏭️  Admin user already exists: ${adminEmail}`);
+    console.log('✅ Admin user created from configured environment credentials.');
+  } else if (!existingAdmin) {
+    console.warn('[DB Seed] Admin account skipped; configure ADMIN_EMAIL and ADMIN_PASSWORD in Vercel.');
   }
 
   // ── Categories (from existing Nobo Fashion site) ──
@@ -550,14 +551,16 @@ async function seed() {
 
   console.log('\n══════════════════════════════════════════════');
   console.log('  🎉 Database seeded successfully with real reference data!');
-  console.log(`  👤 Admin Email:    ${adminEmail}`);
-  console.log(`  🔑 Admin Password: ${adminPassword}`);
   console.log('══════════════════════════════════════════════\n');
 }
 
-seed()
-  .then(() => process.exit(0))
-  .catch((err) => {
-    console.error('❌ Seeding failed:', err);
-    process.exit(1);
-  });
+module.exports = { seed };
+
+if (require.main === module) {
+  seed()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error('❌ Seeding failed:', err);
+      process.exit(1);
+    });
+}

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getImagesDir } from '@/lib/db';
 import fs from 'fs';
 import path from 'path';
 
@@ -41,7 +42,7 @@ export async function POST(req) {
     }
 
     // Ensure upload directory exists
-    const uploadDir = path.resolve(process.cwd(), 'data', 'images');
+    const uploadDir = getImagesDir();
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }

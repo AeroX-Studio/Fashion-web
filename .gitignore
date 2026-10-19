@@ -25,6 +25,7 @@ pnpm-debug.log*
 
 # Deployment
 .vercel/
+/.vercel-catalog-bootstrap-check/
 
 # OS / editor files
 .DS_Store
