@@ -22,6 +22,11 @@ const nextConfig = {
     ];
   },
   experimental: {
+    // sql.js resolves its WebAssembly binary at runtime, which output tracing
+    // cannot infer from the package's dynamic locateFile() call.
+    outputFileTracingIncludes: {
+      '/*': ['./node_modules/sql.js/dist/sql-wasm.wasm'],
+    },
     serverComponentsExternalPackages: ['sql.js', 'bcryptjs'],
   },
   webpack: (config, { isServer }) => {
