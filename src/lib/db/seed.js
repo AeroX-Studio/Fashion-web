@@ -94,7 +94,7 @@ async function seed({ bootstrap = false, initialized = false, resetProducts = fa
   }
 
   // ── Admin User ──
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@priyocollection.com';
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@nobofashion.com';
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456';
 
   const existingAdmin = get(
@@ -200,8 +200,8 @@ async function seed({ bootstrap = false, initialized = false, resetProducts = fa
     delivery_dhaka: '80',
     delivery_outside_dhaka: '150',
     free_delivery_threshold: '0',
-    order_prefix: 'PC',
-    invoice_prefix: 'INV-PC',
+    order_prefix: 'NF',
+    invoice_prefix: 'INV-NF',
     meta_title: "Nobo Fashion — Women's Fashion & Three-Piece in Bangladesh",
     meta_description:
       'Shop Nobo Fashion for premium three-piece, gowns, sarees and unstitched dresses. 100% authentic, cash on delivery, fast nationwide delivery across Bangladesh.',

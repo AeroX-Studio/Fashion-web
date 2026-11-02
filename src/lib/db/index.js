@@ -93,10 +93,18 @@ async function initDatabase() {
     }
 
     // Ensure store contact information matches latest configuration
+    run("UPDATE settings SET value = 'Nobo Fashion' WHERE key = 'store_name'");
+    run("UPDATE settings SET value = 'info@nobofashion.com' WHERE key = 'store_email'");
+    run("UPDATE settings SET value = 'Shop Nobo Fashion for premium three-piece, gowns, sarees and unstitched dresses. 100% authentic, cash on delivery, fast nationwide delivery across Bangladesh.' WHERE key = 'store_description'");
+    run("UPDATE settings SET value = 'Nobo Fashion — Women''s Fashion & Three-Piece in Bangladesh' WHERE key = 'meta_title'");
+    run("UPDATE settings SET value = 'Shop Nobo Fashion for premium three-piece, gowns, sarees and unstitched dresses. 100% authentic, cash on delivery, fast nationwide delivery across Bangladesh.' WHERE key = 'meta_description'");
     run("UPDATE settings SET value = 'House 10, Road 1/A, Sector 9, Uttara, Dhaka, Bangladesh' WHERE key = 'store_address'");
     run("UPDATE settings SET value = '+880 1301-806880' WHERE key = 'store_phone'");
     run("UPDATE settings SET value = '+880 1301-806880' WHERE key = 'store_phone_complaints'");
     run("UPDATE settings SET value = '8801301806880' WHERE key = 'store_whatsapp'");
+    run("UPDATE settings SET value = 'NF' WHERE key = 'order_prefix'");
+    run("UPDATE settings SET value = 'INV-NF' WHERE key = 'invoice_prefix'");
+    run("UPDATE users SET email = 'admin@nobofashion.com', phone = '+880 1301-806880' WHERE user_type = 'admin'");
 
     if (isNewDatabase) {
       persistDb();
