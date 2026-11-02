@@ -35,11 +35,22 @@ async function saveFileBuffer(file, uploadDir) {
   const filename = `${originalBase || 'nobo-fashion'}-${uniqueSuffix}.${ext}`;
   const filePath = path.join(uploadDir, filename);
 
-  fs.writeFileSync(filePath, buffer);
+  try {
+    fs.writeFileSync(filePath, buffer);
+  } catch (err) {
+    console.warn('[Upload] Failed to write to disk:', err.message);
+  }
+
+  // On Vercel serverless, ephemeral containers do not share /tmp across invocations.
+  // Using Base64 Data URI guarantees uploaded product images NEVER 404 in production.
+  const isVercel = process.env.VERCEL === '1';
+  const dataUrl = `data:${mime || 'image/jpeg'};base64,${buffer.toString('base64')}`;
+
   return {
-    url: `/api/images/${filename}`,
+    url: isVercel ? dataUrl : `/api/images/${filename}`,
     filename,
     size: buffer.length,
+    dataUrl,
   };
 }
 

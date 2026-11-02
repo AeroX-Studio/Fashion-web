@@ -3,6 +3,60 @@
 import React, { useState, useRef } from 'react';
 import { getImageUrl } from '@/lib/imageHelper';
 
+async function compressImageFile(file) {
+  if (!file || !file.type.startsWith('image/') || file.type === 'image/svg+xml' || file.type === 'image/gif') {
+    return file;
+  }
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 1600;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+          if (width / height > MAX_WIDTH / MAX_HEIGHT) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          } else {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob && blob.size < file.size) {
+              const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          0.85
+        );
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
 export function MultiImageUploader({
   images = [],
   onChange,
@@ -64,11 +118,12 @@ export function MultiImageUploader({
 
     setUploading(true);
     setErrorMsg('');
-    setUploadProgress(`Uploading ${validFiles.length} image(s)...`);
+    setUploadProgress(`Optimizing and uploading ${validFiles.length} image(s)...`);
 
     try {
+      const compressedFiles = await Promise.all(validFiles.map((f) => compressImageFile(f)));
       const formData = new FormData();
-      validFiles.forEach((file) => formData.append('files', file));
+      compressedFiles.forEach((file) => formData.append('files', file));
 
       const res = await fetch('/api/admin/upload', {
         method: 'POST',

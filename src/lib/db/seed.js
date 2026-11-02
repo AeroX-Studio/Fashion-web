@@ -94,24 +94,28 @@ async function seed({ bootstrap = false, initialized = false, resetProducts = fa
   }
 
   // ── Admin User ──
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@nobofashion.com';
+  const adminEmail = (process.env.ADMIN_EMAIL || 'admin@nobofashion.com').toLowerCase().trim();
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456';
 
   const existingAdmin = get(
     "SELECT id FROM users WHERE email = ? AND user_type = 'admin' LIMIT 1",
     [adminEmail]
   ) || get("SELECT id FROM users WHERE user_type = 'admin' ORDER BY id ASC LIMIT 1");
-  const canCreateAdmin = !bootstrap || Boolean(process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD);
-  if (!existingAdmin && canCreateAdmin) {
+
+  if (!existingAdmin) {
     const hashedPassword = bcrypt.hashSync(adminPassword, 10);
     run(
       `INSERT INTO users (name, email, phone, password_hash, role_id, user_type, status)
        VALUES (?, ?, ?, ?, ?, 'admin', 'active')`,
-      ['Admin', adminEmail, '+8801301806880', hashedPassword, superAdminRole ? superAdminRole.id : null]
+      ['Admin', adminEmail, '+880 1301-806880', hashedPassword, superAdminRole ? superAdminRole.id : null]
     );
-    console.log('✅ Admin user created from configured environment credentials.');
-  } else if (!existingAdmin) {
-    console.warn('[DB Seed] Admin account skipped; configure ADMIN_EMAIL and ADMIN_PASSWORD in Vercel.');
+    console.log(`✅ Admin user created: ${adminEmail}`);
+  } else {
+    // Ensure existing admin has the updated phone and email
+    run(
+      "UPDATE users SET email = ?, phone = '+880 1301-806880' WHERE id = ?",
+      [adminEmail, existingAdmin.id]
+    );
   }
 
   // ── Categories ──

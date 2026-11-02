@@ -28,15 +28,28 @@ export async function GET(req, { params }) {
 
     // Prevent path traversal
     const safeFilename = path.basename(decodedFilename);
-    const imagesDir = path.resolve(getImagesDir());
-    const filePath = path.resolve(imagesDir, safeFilename);
+    const candidateDirs = [
+      path.resolve(getImagesDir()),
+      path.resolve(process.cwd(), 'public', 'images'),
+      path.resolve(process.cwd(), 'public', 'products'),
+      path.resolve(process.cwd(), 'public'),
+      path.resolve(process.cwd(), 'data', 'images'),
+    ];
 
-    // Security check: ensure path stays within data/images
-    if (!filePath.startsWith(imagesDir)) {
-      return new Response('Access denied', { status: 403 });
+    let filePath = null;
+    for (const dir of candidateDirs) {
+      const candidate = path.resolve(dir, safeFilename);
+      if (candidate.startsWith(dir) && fs.existsSync(candidate)) {
+        try {
+          if (!fs.statSync(candidate).isDirectory()) {
+            filePath = candidate;
+            break;
+          }
+        } catch (_) {}
+      }
     }
 
-    if (!fs.existsSync(filePath)) {
+    if (!filePath) {
       return new Response('Image not found', { status: 404 });
     }
 

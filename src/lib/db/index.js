@@ -71,8 +71,20 @@ async function initDatabase() {
       SQL = await initSqlJs();
     }
 
-    const isNewDatabase = !fs.existsSync(DB_PATH);
-    if (!isNewDatabase) {
+    const STARTER_DB_PATH = path.join(process.cwd(), 'data', 'starter.sqlite');
+    let isNewDatabase = !fs.existsSync(DB_PATH);
+
+    if (isNewDatabase && fs.existsSync(STARTER_DB_PATH)) {
+      try {
+        console.log('[DB] Hydrating database from pre-bundled starter.sqlite...');
+        fs.copyFileSync(STARTER_DB_PATH, DB_PATH);
+        isNewDatabase = false;
+      } catch (copyErr) {
+        console.warn('[DB] Could not copy starter.sqlite:', copyErr);
+      }
+    }
+
+    if (!isNewDatabase && fs.existsSync(DB_PATH)) {
       const fileBuffer = fs.readFileSync(DB_PATH);
       dbInstance = new SQL.Database(fileBuffer);
     } else {
@@ -90,6 +102,13 @@ async function initDatabase() {
       await seed({ bootstrap: true, initialized: true, resetProducts: true });
       run("INSERT OR REPLACE INTO settings (key, value) VALUES ('catalog_version', ?)", [CATALOG_VERSION]);
       persistDb();
+    }
+
+    // Ensure super admin account is guaranteed to exist
+    const adminUser = get("SELECT id FROM users WHERE user_type = 'admin' LIMIT 1");
+    if (!adminUser) {
+      const { seed } = require('./seed');
+      await seed({ bootstrap: true, initialized: true, resetProducts: false });
     }
 
     // Ensure store contact information matches latest configuration

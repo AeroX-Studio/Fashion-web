@@ -78,7 +78,7 @@ export default async function HomePage() {
         {/* Background Showroom Photograph from data/images */}
         <div className="sw-hero-bg-wrapper">
           <img
-            src="/api/images/hero-boutique.jpg"
+            src="/images/hero-boutique.jpg"
             alt="Nobo Fashion Luxury Showroom Uttara"
             className="sw-hero-bg-img"
             fetchPriority="high"
@@ -396,7 +396,7 @@ export default async function HomePage() {
 
             <div style={{ borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', background: '#1E293B' }}>
               <img
-                src="/api/images/hero-boutique.jpg"
+                src="/images/hero-boutique.jpg"
                 alt="Nobo Fashion Storefront"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
