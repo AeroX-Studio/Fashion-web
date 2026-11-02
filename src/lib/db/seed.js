@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const { initDatabase, getDb, run, insert, get, all, exec, saveImmediately } = require('./index');
 const { SCHEMA } = require('./schema');
 
-async function seed({ bootstrap = false, initialized = false } = {}) {
+async function seed({ bootstrap = false, initialized = false, resetProducts = false } = {}) {
   console.log('🌱 Initializing Nobo Fashion database...\n');
   if (!initialized) await initDatabase();
 
@@ -114,7 +114,7 @@ async function seed({ bootstrap = false, initialized = false } = {}) {
     console.warn('[DB Seed] Admin account skipped; configure ADMIN_EMAIL and ADMIN_PASSWORD in Vercel.');
   }
 
-  // ── Categories (from existing Nobo Fashion site) ──
+  // ── Categories ──
   const categories = [
     { name: '1 Piece / Kurti', slug: '1-piece-kurti', sidebar: 1, header: 1, homepage: 1, sort: 1 },
     { name: '3 Piece', slug: '3-piece', sidebar: 1, header: 1, homepage: 1, sort: 2 },
@@ -264,233 +264,131 @@ async function seed({ bootstrap = false, initialized = false } = {}) {
   }
   console.log('✅ Homepage sections created');
 
-  // Seed sample real products from the reference site so the storefront is immediately rich and alive
+  // ── Reset previous products if requested ──
+  if (resetProducts) {
+    console.log('🧹 Clearing old products to replace with new catalog...');
+    run('DELETE FROM product_images');
+    run('DELETE FROM product_variants');
+    run('DELETE FROM size_charts WHERE product_id IS NOT NULL');
+    run('DELETE FROM reviews');
+    run('DELETE FROM products');
+  }
+
+  // ── Real Products with User Images and Multi-Image support ──
   const sampleProducts = [
     {
-      name: 'Pakistani (Bin Hameed Inspired)',
-      slug: 'pakistani-bin-hameed-inspired',
+      name: 'Exclusive Batik Print Three Piece - Deep Maroon',
+      slug: 'exclusive-batik-print-three-piece-deep-maroon',
       category_slug: '3-piece',
-      sku: 'PRY-PAK4',
-      price: 4200,
-      stock: 15,
+      sku: 'NOBO-BTK-01',
+      price: 2650,
+      sale_price: 2450,
+      stock: 25,
       is_featured: 1,
       is_new_arrival: 1,
-      image: 'https://priyocollectionbd.com/images/products/PRY-PAK4.jpg?v=1785083021',
-      description: 'Authentic Pakistani Bin Hameed inspired luxury 3-piece suit with intricate embroidery and premium fabric.',
-      variants: [{ size: 'Free', price: 4200, stock: 15 }],
+      is_best_seller: 1,
+      images: [
+        { url: '/products/maroon-batik-three-piece.jpg', is_primary: 1, alt: 'Deep Maroon Handcrafted Batik Three Piece' },
+      ],
+      description: 'Exclusive handcrafted batik printed cotton three-piece suit with rich traditional border detailing and lightweight matching dupatta. Breathable, comfortable, and tailored from 100% pure premium cotton.',
+      variants: [
+        { size: 'Free', price: 2450, stock: 10 },
+        { size: 'M', price: 2450, stock: 5 },
+        { size: 'L', price: 2450, stock: 5 },
+        { size: 'XL', price: 2450, stock: 5 },
+      ],
     },
     {
-      name: 'Pakistani Gharara',
-      slug: 'pakistani-gharara',
+      name: 'Luxury Floral Cotton Three Piece - Sky Blue',
+      slug: 'luxury-floral-cotton-three-piece-sky-blue',
       category_slug: '3-piece',
-      sku: 'PRY-PAK5',
-      price: 6200,
-      stock: 24,
-      is_featured: 1,
-      is_best_seller: 1,
-      image: 'https://priyocollectionbd.com/images/products/PRY-PAK5.jpg?v=1785083021',
-      description: 'Stunning Pakistani Gharara traditional formal outfit. Hand-finished details, rich color and magnificent flair.',
-      variants: [
-        { size: 'S', price: 6200, stock: 8 },
-        { size: 'M', price: 6200, stock: 10 },
-        { size: 'L', price: 6200, stock: 6 },
-      ],
-    },
-    {
-      name: 'Agha Noor (Pakistani 2 Pieces)',
-      slug: 'agha-noor-pakistani-2-pieces',
-      category_slug: 'co-ord-2-piece',
-      sku: 'PRY-PAK3',
-      price: 3900,
-      stock: 55,
-      is_featured: 1,
-      is_new_arrival: 1,
-      image: 'https://priyocollectionbd.com/images/products/PRY-PAK3.jpg?v=1785083021',
-      description: 'Agha Noor style Pakistani 2-piece ready-to-wear kurta and trouser combination in breathable premium lawn fabric.',
-      variants: [
-        { size: '38', price: 3900, stock: 5 },
-        { size: '40', price: 3900, stock: 5 },
-        { size: '42', price: 3900, stock: 5 },
-        { size: '44', price: 3900, stock: 5 },
-        { size: '46', price: 3900, stock: 5 },
-        { size: '48', price: 3900, stock: 5 },
-        { size: '50', price: 3900, stock: 5 },
-        { size: '52', price: 3900, stock: 5 },
-        { size: 'S', price: 3900, stock: 5 },
-        { size: 'M', price: 3900, stock: 5 },
-        { size: 'L', price: 3900, stock: 5 },
-      ],
-    },
-    {
-      name: 'Patabahar Co-Ords',
-      slug: 'patabahar-co-ords',
-      category_slug: 'co-ord-2-piece',
-      sku: 'PRY-PB36L1',
-      price: 1250,
-      stock: 30,
-      is_best_seller: 1,
-      image: 'https://priyocollectionbd.com/images/products/PRY-PB36L1.jpg?v=1785083021',
-      description: 'Trendy and comfortable Patabahar printed 2-piece daily co-ord set for women.',
-      variants: [{ size: 'Free', price: 1250, stock: 30 }],
-    },
-    {
-      name: 'Blue Co-Ords',
-      slug: 'blue-co-ords',
-      category_slug: 'co-ord-2-piece',
-      sku: 'PRY-PD001',
-      price: 1450,
-      stock: 40,
-      is_new_arrival: 1,
-      image: 'https://priyocollectionbd.com/images/products/PRY-PD001.jpg?v=1785083021',
-      description: 'Elegant royal blue co-ord set crafted with premium cotton for comfortable daylong wear.',
-      variants: [
-        { size: '38', price: 1450, stock: 5 },
-        { size: '40', price: 1450, stock: 5 },
-        { size: '42', price: 1450, stock: 5 },
-        { size: '44', price: 1450, stock: 5 },
-        { size: '46', price: 1450, stock: 5 },
-        { size: '48', price: 1450, stock: 5 },
-        { size: '50', price: 1450, stock: 5 },
-        { size: '52', price: 1450, stock: 5 },
-      ],
-    },
-    {
-      name: 'White Co-Ords',
-      slug: 'white-co-ords',
-      category_slug: 'co-ord-2-piece',
-      sku: 'PRY-PD002',
-      price: 1450,
-      stock: 40,
-      is_featured: 1,
-      image: 'https://priyocollectionbd.com/images/products/PRY-PD002.jpg?v=1785083021',
-      description: 'Pristine white co-ord set with minimalist embroidery and soft touch finish.',
-      variants: [
-        { size: '38', price: 1450, stock: 5 },
-        { size: '40', price: 1450, stock: 5 },
-        { size: '42', price: 1450, stock: 5 },
-        { size: '44', price: 1450, stock: 5 },
-        { size: '46', price: 1450, stock: 5 },
-        { size: '48', price: 1450, stock: 5 },
-        { size: '50', price: 1450, stock: 5 },
-        { size: '52', price: 1450, stock: 5 },
-      ],
-    },
-    {
-      name: 'Beguni Co-Ords',
-      slug: 'beguni-co-ords',
-      category_slug: 'co-ord-2-piece',
-      sku: 'PRY-PD003',
-      price: 1450,
-      stock: 40,
-      is_new_arrival: 1,
-      image: 'https://priyocollectionbd.com/images/products/PRY-PD003.jpg?v=1785083021',
-      description: 'Deep violet beguni co-ord set that pairs effortlessly with ethnic and modern looks.',
-      variants: [
-        { size: '38', price: 1450, stock: 5 },
-        { size: '40', price: 1450, stock: 5 },
-        { size: '42', price: 1450, stock: 5 },
-        { size: '44', price: 1450, stock: 5 },
-        { size: '46', price: 1450, stock: 5 },
-        { size: '48', price: 1450, stock: 5 },
-        { size: '50', price: 1450, stock: 5 },
-        { size: '52', price: 1450, stock: 5 },
-      ],
-    },
-    {
-      name: 'Nobo Fashion LP-01',
-      slug: 'priyo-made-lp-01',
-      category_slug: 'ladies-parts',
-      sku: 'PRY-LP025B',
-      price: 2500,
+      sku: 'NOBO-FLR-02',
+      price: 2850,
+      sale_price: 2650,
       stock: 30,
       is_featured: 1,
-      image: 'https://priyocollectionbd.com/images/products/PRY-LP025B.jpg?v=1785083021',
-      description: 'Nobo Fashion exclusive in-house curated luxury evening clutch bag.',
+      is_new_arrival: 1,
+      is_best_seller: 0,
+      images: [
+        { url: '/products/sky-blue-embroidered-three-piece.jpg', is_primary: 1, alt: 'Sky Blue Floral Embroidered Three Piece' },
+        { url: '/products/rust-orange-embroidered-three-piece.jpg', is_primary: 0, alt: 'Floral Three Piece - Alternate Colorway View' },
+      ],
+      description: 'Elegant sky blue all-over floral motif three-piece suit featuring an intricately embroidered neckline, stylish sleeve cuffs, and an artistic printed organza-blend dupatta.',
       variants: [
-        { size: 'Free', color: 'Black', price: 2500, stock: 10 },
-        { size: 'Free', color: 'Maroon', price: 2500, stock: 10 },
-        { size: 'Free', color: 'Silver', price: 2500, stock: 10 },
+        { size: '38', price: 2650, stock: 6 },
+        { size: '40', price: 2650, stock: 8 },
+        { size: '42', price: 2650, stock: 8 },
+        { size: '44', price: 2650, stock: 4 },
+        { size: '46', price: 2650, stock: 4 },
       ],
     },
     {
-      name: 'Ladies Parts Premium',
-      slug: 'ladies-parts-premium',
-      category_slug: 'ladies-parts',
-      sku: 'PRY-LP026',
-      price: 4990,
-      stock: 12,
+      name: 'Luxury Floral Cotton Three Piece - Rust Terracotta',
+      slug: 'luxury-floral-cotton-three-piece-rust-terracotta',
+      category_slug: '3-piece',
+      sku: 'NOBO-FLR-03',
+      price: 2850,
+      sale_price: 2650,
+      stock: 25,
+      is_featured: 1,
+      is_new_arrival: 1,
       is_best_seller: 1,
-      image: 'https://priyocollectionbd.com/images/products/PRY-LP026.jpg?v=1785083021',
-      description: 'Premium craftsmanship designer ladies bag with metallic accents and detachable strap.',
-      variants: [{ size: 'Free', price: 4990, stock: 12 }],
+      images: [
+        { url: '/products/rust-orange-embroidered-three-piece.jpg', is_primary: 1, alt: 'Rust Terracotta Floral Embroidered Three Piece' },
+        { url: '/products/sky-blue-embroidered-three-piece.jpg', is_primary: 0, alt: 'Floral Three Piece - Alternate Colorway View' },
+      ],
+      description: 'Warm rust terracotta printed three-piece with exquisite front buttoned embroidery, breathable lawn cotton fabric, and an artistically coordinated floral dupatta.',
+      variants: [
+        { size: '38', price: 2650, stock: 5 },
+        { size: '40', price: 2650, stock: 6 },
+        { size: '42', price: 2650, stock: 6 },
+        { size: '44', price: 2650, stock: 4 },
+        { size: '46', price: 2650, stock: 4 },
+      ],
     },
     {
-      name: 'Super Premium Ladies Parts',
-      slug: 'super-premium-ladies-parts',
-      category_slug: 'ladies-parts',
-      sku: 'PRY-LP028',
-      price: 5990,
-      stock: 10,
+      name: 'Designer Polka Dot & Floral Three Piece - Off-White',
+      slug: 'designer-polka-dot-floral-three-piece-off-white',
+      category_slug: '3-piece',
+      sku: 'NOBO-PLF-04',
+      price: 2950,
+      sale_price: 2750,
+      stock: 20,
       is_featured: 1,
-      image: 'https://priyocollectionbd.com/images/products/PRY-LP028.jpg?v=1785083021',
-      description: 'Top-tier luxury structured purse featuring crystal embellishments and signature hardware.',
-      variants: [{ size: 'Free', price: 5990, stock: 10 }],
+      is_new_arrival: 1,
+      is_best_seller: 1,
+      images: [
+        { url: '/products/offwhite-polka-floral-three-piece.jpg', is_primary: 1, alt: 'Off-White Designer Polka Dot & Floral Three Piece' },
+      ],
+      description: 'Modern chic off-white three-piece ensemble adorned with vibrant floral artwork, contrasting monochrome polka dot dupatta, and comfortable tailored silhouette.',
+      variants: [
+        { size: 'Free', price: 2750, stock: 8 },
+        { size: 'M', price: 2750, stock: 4 },
+        { size: 'L', price: 2750, stock: 4 },
+        { size: 'XL', price: 2750, stock: 4 },
+      ],
     },
     {
-      name: 'Butterfly Neck Piece',
-      slug: 'butterfly-neck-piece',
-      category_slug: 'jewellery',
-      sku: 'PRY-J0001',
-      price: 350,
-      stock: 50,
+      name: 'Traditional Bandhani Printed Three Piece - Lime Olive',
+      slug: 'traditional-bandhani-printed-three-piece-lime-olive',
+      category_slug: '3-piece',
+      sku: 'NOBO-BND-05',
+      price: 2550,
+      sale_price: 2350,
+      stock: 20,
       is_featured: 1,
-      image: 'https://priyocollectionbd.com/images/products/PRY-J0001.jpg?v=1785083021',
-      description: 'Delicate butterfly pendant necklace with fine chain and crystal accents.',
-      variants: [{ size: 'Free', price: 350, stock: 50 }],
-    },
-    {
-      name: 'Finger Ring 1',
-      slug: 'finger-ring-1',
-      category_slug: 'jewellery',
-      sku: 'PRY-J0002',
-      price: 150,
-      stock: 60,
-      image: 'https://priyocollectionbd.com/images/products/PRY-J0002.jpg?v=1785083021',
-      description: 'Minimalist adjustable fashion finger ring with polished gold tone.',
-      variants: [{ size: 'Free', price: 150, stock: 60 }],
-    },
-    {
-      name: 'Finger Ring 2',
-      slug: 'finger-ring-2',
-      category_slug: 'jewellery',
-      sku: 'PRY-J0003',
-      price: 220,
-      stock: 45,
-      image: 'https://priyocollectionbd.com/images/products/PRY-J0003.jpg?v=1785083021',
-      description: 'Dual band statement finger ring studded with simulated micro zircons.',
-      variants: [{ size: 'Free', price: 220, stock: 45 }],
-    },
-    {
-      name: 'Neck Piece 2',
-      slug: 'neck-piece-2',
-      category_slug: 'jewellery',
-      sku: 'PRY-J0004',
-      price: 300,
-      stock: 35,
-      image: 'https://priyocollectionbd.com/images/products/PRY-J0004.jpg?v=1785083021',
-      description: 'Chic layered necklace with delicate pendant charms.',
-      variants: [{ size: 'Free', price: 300, stock: 35 }],
-    },
-    {
-      name: 'Haid Band 1',
-      slug: 'haid-band-1',
-      category_slug: 'jewellery',
-      sku: 'PRY-J0006',
-      price: 150,
-      stock: 40,
-      image: 'https://priyocollectionbd.com/images/products/PRY-J0006.jpg?v=1785083021',
-      description: 'Velvet padded hair band with non-slip grip and subtle sheen.',
-      variants: [{ size: 'Free', price: 150, stock: 40 }],
+      is_new_arrival: 1,
+      is_best_seller: 0,
+      images: [
+        { url: '/products/olive-lime-bandhani-three-piece.jpg', is_primary: 1, alt: 'Lime Olive Traditional Bandhani Printed Three Piece' },
+      ],
+      description: 'Festive lime olive green three-piece adorned with traditional bandhani tie-dye geometric patterns, neck embroidery, and a bright multicolor patterned dupatta.',
+      variants: [
+        { size: 'Free', price: 2350, stock: 8 },
+        { size: 'M', price: 2350, stock: 4 },
+        { size: 'L', price: 2350, stock: 4 },
+        { size: 'XL', price: 2350, stock: 4 },
+      ],
     },
   ];
 
@@ -501,8 +399,8 @@ async function seed({ bootstrap = false, initialized = false } = {}) {
     const existing = get('SELECT id FROM products WHERE slug = ?', [p.slug]);
     if (!existing) {
       const prodId = insert(
-        `INSERT INTO products (name, slug, description, category_id, sku, price, stock, is_featured, is_new_arrival, is_best_seller, is_active)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+        `INSERT INTO products (name, slug, description, category_id, sku, price, sale_price, stock, is_featured, is_new_arrival, is_best_seller, is_active)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
         [
           p.name,
           p.slug,
@@ -510,6 +408,7 @@ async function seed({ bootstrap = false, initialized = false } = {}) {
           catId,
           p.sku,
           p.price,
+          p.sale_price || null,
           p.stock,
           p.is_featured || 0,
           p.is_new_arrival || 0,
@@ -517,11 +416,22 @@ async function seed({ bootstrap = false, initialized = false } = {}) {
         ]
       );
 
-      if (p.image) {
-        run('INSERT INTO product_images (product_id, url, alt, sort_order, is_primary) VALUES (?, ?, ?, 0, 1)', [
+      // Support array of images
+      const prodImages = Array.isArray(p.images) && p.images.length > 0
+        ? p.images
+        : (p.image ? [{ url: p.image, is_primary: 1, alt: p.name }] : []);
+
+      for (let i = 0; i < prodImages.length; i++) {
+        const img = prodImages[i];
+        const imgUrl = typeof img === 'string' ? img : img.url;
+        const imgAlt = (typeof img === 'object' && img.alt) ? img.alt : p.name;
+        const isPrimary = (typeof img === 'object' && img.is_primary !== undefined) ? (img.is_primary ? 1 : 0) : (i === 0 ? 1 : 0);
+        run('INSERT INTO product_images (product_id, url, alt, sort_order, is_primary) VALUES (?, ?, ?, ?, ?)', [
           prodId,
-          p.image,
-          p.name,
+          imgUrl,
+          imgAlt,
+          i,
+          isPrimary,
         ]);
       }
 
@@ -536,7 +446,7 @@ async function seed({ bootstrap = false, initialized = false } = {}) {
               v.size || 'Free',
               v.color || null,
               `${p.sku}-${v.size || 'FREE'}${v.color ? '-' + v.color : ''}`,
-              v.price || p.price,
+              v.price || p.sale_price || p.price,
               v.stock || 10,
               i,
             ]
@@ -557,7 +467,7 @@ async function seed({ bootstrap = false, initialized = false } = {}) {
 module.exports = { seed };
 
 if (require.main === module) {
-  seed()
+  seed({ resetProducts: true })
     .then(() => process.exit(0))
     .catch((err) => {
       console.error('❌ Seeding failed:', err);

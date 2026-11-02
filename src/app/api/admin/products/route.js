@@ -41,8 +41,11 @@ export async function GET(req) {
 
     const products = all(sql, params).map((p) => {
       const variants = all('SELECT * FROM product_variants WHERE product_id = ? ORDER BY sort_order ASC', [p.id]);
+      const images = all('SELECT * FROM product_images WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC', [p.id]);
       return {
         ...p,
+        image: images[0]?.url || p.image || '',
+        images,
         variants,
       };
     });
@@ -76,6 +79,7 @@ export async function POST(req) {
       isNewArrival,
       isBestSeller,
       imageUrl,
+      images,
       variants, // Array of { size_name, color_name, price, stock, sku }
     } = body;
 
@@ -147,12 +151,39 @@ export async function POST(req) {
       ]
       );
 
-    // Save image
-      if (imageUrl) {
+      // Save images (supports multiple images)
+      const normalizedImages = [];
+      if (Array.isArray(images) && images.length > 0) {
+        images.forEach((img, idx) => {
+          const url = typeof img === 'string' ? img.trim() : (img?.url || '').trim();
+          if (url) {
+            normalizedImages.push({
+              url,
+              alt: (typeof img === 'object' && img?.alt) ? img.alt : name,
+              is_primary: (typeof img === 'object' && img?.is_primary) ? 1 : 0,
+              sort_order: (typeof img === 'object' && Number.isInteger(img?.sort_order)) ? img.sort_order : idx,
+            });
+          }
+        });
+      } else if (imageUrl && String(imageUrl).trim()) {
+        normalizedImages.push({
+          url: String(imageUrl).trim(),
+          alt: name,
+          is_primary: 1,
+          sort_order: 0,
+        });
+      }
+
+      if (normalizedImages.length > 0 && !normalizedImages.some((i) => i.is_primary === 1)) {
+        normalizedImages[0].is_primary = 1;
+      }
+
+      for (let i = 0; i < normalizedImages.length; i++) {
+        const img = normalizedImages[i];
         insert(
-        `INSERT INTO product_images (product_id, url, alt, is_primary, sort_order)
-         VALUES (?, ?, ?, 1, 0)`,
-        [productId, imageUrl, name]
+          `INSERT INTO product_images (product_id, url, alt, is_primary, sort_order)
+           VALUES (?, ?, ?, ?, ?)`,
+          [productId, img.url, img.alt, img.is_primary, img.sort_order !== undefined ? img.sort_order : i]
         );
       }
 

@@ -58,6 +58,7 @@ export async function PUT(req, { params }) {
       isBestSeller,
       isActive,
       imageUrl,
+      images,
       variants,
     } = body;
 
@@ -139,8 +140,34 @@ export async function PUT(req, { params }) {
       ]
     );
 
-    // Update image
-    if (typeof imageUrl === 'string') {
+    // Update images (supports multiple images)
+    if (Array.isArray(images)) {
+      run('DELETE FROM product_images WHERE product_id = ?', [productId]);
+      const normalizedImages = [];
+      images.forEach((img, idx) => {
+        const url = typeof img === 'string' ? img.trim() : (img?.url || '').trim();
+        if (url) {
+          normalizedImages.push({
+            url,
+            alt: (typeof img === 'object' && img?.alt) ? img.alt : name,
+            is_primary: (typeof img === 'object' && img?.is_primary) ? 1 : 0,
+            sort_order: (typeof img === 'object' && Number.isInteger(img?.sort_order)) ? img.sort_order : idx,
+          });
+        }
+      });
+
+      if (normalizedImages.length > 0 && !normalizedImages.some((i) => i.is_primary === 1)) {
+        normalizedImages[0].is_primary = 1;
+      }
+
+      for (let i = 0; i < normalizedImages.length; i++) {
+        const img = normalizedImages[i];
+        insert(
+          'INSERT INTO product_images (product_id, url, alt, is_primary, sort_order) VALUES (?, ?, ?, ?, ?)',
+          [productId, img.url, img.alt, img.is_primary, img.sort_order !== undefined ? img.sort_order : i]
+        );
+      }
+    } else if (typeof imageUrl === 'string') {
       const existingImage = get('SELECT id FROM product_images WHERE product_id = ? AND is_primary = 1', [productId]);
       if (imageUrl.trim() && existingImage) {
         run('UPDATE product_images SET url = ?, alt = ? WHERE id = ?', [imageUrl.trim(), name, existingImage.id]);

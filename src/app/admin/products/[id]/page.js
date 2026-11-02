@@ -13,13 +13,14 @@ export default async function AdminEditProductPage({ params }) {
     notFound();
   }
 
-  const images = all('SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order ASC', [product.id]);
+  const images = all('SELECT * FROM product_images WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC', [product.id]);
   const variants = all('SELECT * FROM product_variants WHERE product_id = ? ORDER BY sort_order ASC', [product.id]);
   const categories = all('SELECT * FROM categories WHERE is_active = 1 ORDER BY sort_order ASC, name ASC');
 
   const fullProduct = {
     ...product,
     imageUrl: images[0]?.url || product.image || '',
+    images,
     variants: variants.length > 0 ? variants : [{ size_name: 'Free', price: product.price, stock: product.stock, color_name: '' }],
   };
 

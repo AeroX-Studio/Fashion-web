@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ImageUploader } from '@/components/admin/ImageUploader';
+import { MultiImageUploader } from '@/components/admin/MultiImageUploader';
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -21,6 +21,7 @@ export default function NewProductPage() {
     stock: 20,
     description: '',
     imageUrl: '',
+    images: [],
     isFeatured: false,
     isNewArrival: true,
     isBestSeller: false,
@@ -108,6 +109,8 @@ export default function NewProductPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...productData,
+          images: productData.images,
+          imageUrl: productData.images[0]?.url || productData.imageUrl || '',
           stock: totalStock,
           variants,
         }),
@@ -267,9 +270,13 @@ export default function NewProductPage() {
           </div>
 
           <div style={{ marginBottom: '18px' }}>
-            <ImageUploader
-              currentImage={productData.imageUrl}
-              onImageChange={(url) => setProductData({ ...productData, imageUrl: url })}
+            <MultiImageUploader
+              images={productData.images}
+              onChange={(imgs) => setProductData({
+                ...productData,
+                images: imgs,
+                imageUrl: imgs[0]?.url || '',
+              })}
             />
           </div>
 

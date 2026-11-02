@@ -80,9 +80,16 @@ async function initDatabase() {
       dbInstance.run(SCHEMA);
     }
 
-    if (process.env.VERCEL === '1' && !get('SELECT id FROM products LIMIT 1')) {
+    const CATALOG_VERSION = 'v2_new_products_2026';
+    const versionRow = get("SELECT value FROM settings WHERE key = 'catalog_version'");
+    const currentVersion = versionRow ? versionRow.value : null;
+
+    if (currentVersion !== CATALOG_VERSION) {
+      console.log(`[DB] Upgrading catalog from "${currentVersion || 'legacy'}" to "${CATALOG_VERSION}"...`);
       const { seed } = require('./seed');
-      await seed({ bootstrap: true, initialized: true });
+      await seed({ bootstrap: true, initialized: true, resetProducts: true });
+      run("INSERT OR REPLACE INTO settings (key, value) VALUES ('catalog_version', ?)", [CATALOG_VERSION]);
+      persistDb();
     }
 
     if (isNewDatabase) {

@@ -164,8 +164,13 @@ export default function AdminProductsPage() {
                         />
                         <div>
                           <strong style={{ fontSize: '13.5px', color: 'var(--navy)' }}>{p.name}</strong>
-                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                            Sold: {p.total_sold || 0} pieces
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', gap: '8px', alignItems: 'center', marginTop: '2px' }}>
+                            <span>Sold: {p.total_sold || 0} pieces</span>
+                            {p.images && p.images.length > 1 && (
+                              <span style={{ background: 'var(--accent-wash)', color: 'var(--accent-deep)', padding: '1px 6px', borderRadius: '4px', fontSize: '10.5px', fontWeight: 600 }}>
+                                <i className="ri-image-2-line"></i> {p.images.length} photos
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>

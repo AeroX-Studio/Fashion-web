@@ -3,13 +3,17 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ImageUploader } from '@/components/admin/ImageUploader';
+import { MultiImageUploader } from '@/components/admin/MultiImageUploader';
 
 export function EditProductClient({ product, categories }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  const initialImages = Array.isArray(product.images) && product.images.length > 0
+    ? product.images
+    : (product.imageUrl ? [{ url: product.imageUrl, is_primary: 1 }] : []);
 
   const [formData, setFormData] = useState({
     name: product.name || '',
@@ -20,7 +24,8 @@ export function EditProductClient({ product, categories }) {
     salePrice: product.sale_price || '',
     stock: product.stock || 0,
     description: product.description || '',
-    imageUrl: product.imageUrl || '',
+    imageUrl: product.imageUrl || (initialImages[0]?.url || ''),
+    images: initialImages,
     isFeatured: product.is_featured === 1,
     isNewArrival: product.is_new_arrival === 1,
     isBestSeller: product.is_best_seller === 1,
@@ -92,6 +97,8 @@ export function EditProductClient({ product, categories }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          images: formData.images,
+          imageUrl: formData.images[0]?.url || formData.imageUrl || '',
           stock: totalStock,
           variants,
         }),
@@ -258,9 +265,13 @@ export function EditProductClient({ product, categories }) {
           </div>
 
           <div style={{ marginBottom: '18px' }}>
-            <ImageUploader
-              currentImage={formData.imageUrl}
-              onImageChange={(url) => setFormData({ ...formData, imageUrl: url })}
+            <MultiImageUploader
+              images={formData.images}
+              onChange={(imgs) => setFormData({
+                ...formData,
+                images: imgs,
+                imageUrl: imgs[0]?.url || '',
+              })}
             />
           </div>
 
