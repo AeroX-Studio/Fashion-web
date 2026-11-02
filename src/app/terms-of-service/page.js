@@ -36,14 +36,14 @@ export default function TermsPage() {
         <h3 style={{ fontSize: '18px', color: 'var(--navy)', marginBottom: '10px' }}>3. Order Verification</h3>
         <p style={{ marginBottom: '20px' }}>
           All Cash on Delivery orders placed on the website may be subject to a quick phone confirmation from our Uttara
-          counter staff (09638-044440) prior to dispatch.
+          showroom staff (+880 1301-806880) prior to dispatch.
         </p>
 
         <h3 style={{ fontSize: '18px', color: 'var(--navy)', marginBottom: '10px' }}>4. Physical Store Visits</h3>
         <p style={{ marginBottom: '24px' }}>
-          You are always welcome to exchange or purchase directly at our counter:
+          You are always welcome to exchange or purchase directly at our showroom:
           <br />
-          <strong>Shop # 6, Basement, Uttara Square Shopping Mall, Sector 13, Uttara, Dhaka</strong>
+          <strong>House 10, Road 1/A, Sector 9, Uttara, Dhaka, Bangladesh</strong>
         </p>
 
         <Link href="/shop" className="btn btn-primary">

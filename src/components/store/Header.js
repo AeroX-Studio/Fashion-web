@@ -89,8 +89,8 @@ export function Header() {
             <span>✨ 100% AUTHENTIC THREE-PIECE &amp; PAKISTANI LAWN • CASH ON DELIVERY ALL OVER BANGLADESH</span>
           </div>
           <div className="pc-topbar-right">
-            <a href="tel:09638044440" className="pc-hotline-link">
-              <i className="ri-phone-fill"></i> 09638-044440
+            <a href="tel:+8801301806880" className="pc-hotline-link">
+              <i className="ri-phone-fill"></i> +880 1301-806880
             </a>
           </div>
         </div>
@@ -364,7 +364,7 @@ export function Header() {
                     <i className="ri-map-pin-2-fill"></i>
                     <div>
                       <strong>Nobo Fashion Showroom</strong>
-                      <p>Shop # 6, Basement, Uttara Square Mall, Sonargaon Janapath, Sector 13, Uttara, Dhaka</p>
+                      <p>House 10, Road 1/A, Sector 9, Uttara, Dhaka, Bangladesh</p>
                     </div>
                   </div>
                   <div className="ox-info-row">
@@ -378,8 +378,8 @@ export function Header() {
                     <i className="ri-phone-fill"></i>
                     <div>
                       <strong>Order Hotline</strong>
-                      <a href="tel:09638044440" style={{ color: 'var(--accent)', fontWeight: 700 }}>
-                        09638-044440
+                      <a href="tel:+8801301806880" style={{ color: 'var(--accent)', fontWeight: 700 }}>
+                        +880 1301-806880
                       </a>
                     </div>
                   </div>
@@ -388,7 +388,7 @@ export function Header() {
 
               <div className="ox-drawer-actions">
                 <a
-                  href="https://wa.me/8801800033223"
+                  href="https://wa.me/8801301806880"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-whatsapp btn-block"

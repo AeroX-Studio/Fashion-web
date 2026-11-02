@@ -47,7 +47,7 @@ export function ProductDetailClient({ product, relatedProducts }) {
   };
 
   const waMessage = `Hi Nobo Fashion! I want to order "${product.name}" in size ${selectedVariant?.size_name || 'Free'} (SKU: ${product.sku}). Is it available?`;
-  const waUrl = `https://wa.me/8801800033223?text=${encodeURIComponent(waMessage)}`;
+  const waUrl = `https://wa.me/8801301806880?text=${encodeURIComponent(waMessage)}`;
 
   return (
     <div className="container sec-pad">

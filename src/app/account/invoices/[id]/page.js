@@ -82,9 +82,8 @@ export default async function InvoiceDetailPage({ params }) {
               style={{ height: '76px', width: '76px', objectFit: 'contain', marginBottom: '8px' }}
             />
             <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-              Shop # 6, Basement, Uttara Square Shopping Mall,<br />
-              Sonargaon Janapath, Sector 13, Uttara, Dhaka<br />
-              Phone: 09638-044440 • Email: info@nobofashion.com
+              House 10, Road 1/A, Sector 9, Uttara, Dhaka, Bangladesh<br />
+              Phone &amp; WhatsApp: +880 1301-806880 • Email: info@nobofashion.com
             </div>
           </div>
 
@@ -207,7 +206,7 @@ export default async function InvoiceDetailPage({ params }) {
           <strong>Important Customer Notice:</strong>
           <div>1. Please hand the exact cash amount of ৳{invoice.total?.toLocaleString('en-BD')} to the delivery courier.</div>
           <div>2. For any size exchange or quality concerns, contact Nobo Fashion customer support within 7 days.</div>
-          <div>3. Customer Hotline: 09638-044440 • Complaints: 01800033220</div>
+          <div>3. Customer Hotline &amp; WhatsApp: +880 1301-806880</div>
         </div>
       </div>
     </div>

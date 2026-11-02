@@ -23,12 +23,12 @@ export function Footer() {
 
             <div className="footer-contact-item">
               <i className="ri-map-pin-line"></i>
-              <span>Shop # 6, Basement, Uttara Square Shopping Mall, Sonargaon Janapath, Sector 13, Uttara, Dhaka</span>
+              <span>House 10, Road 1/A, Sector 9, Uttara, Dhaka, Bangladesh</span>
             </div>
 
             <div className="footer-contact-item">
               <i className="ri-phone-line"></i>
-              <span>09638-044440, 09639-774962</span>
+              <span>+880 1301-806880</span>
             </div>
 
             <div className="footer-contact-item">
@@ -60,7 +60,7 @@ export function Footer() {
               <li><Link href="/account/invoices">My Invoices</Link></li>
               <li><Link href="/account/wishlist">My Wishlist</Link></li>
               <li><Link href="/shop">All Products</Link></li>
-              <li><a href="https://wa.me/8801800033223" target="_blank" rel="noopener noreferrer">Order on WhatsApp</a></li>
+              <li><a href="https://wa.me/8801301806880" target="_blank" rel="noopener noreferrer">Order on WhatsApp</a></li>
             </ul>
           </div>
 

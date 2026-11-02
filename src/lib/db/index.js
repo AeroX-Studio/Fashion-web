@@ -92,6 +92,12 @@ async function initDatabase() {
       persistDb();
     }
 
+    // Ensure store contact information matches latest configuration
+    run("UPDATE settings SET value = 'House 10, Road 1/A, Sector 9, Uttara, Dhaka, Bangladesh' WHERE key = 'store_address'");
+    run("UPDATE settings SET value = '+880 1301-806880' WHERE key = 'store_phone'");
+    run("UPDATE settings SET value = '+880 1301-806880' WHERE key = 'store_phone_complaints'");
+    run("UPDATE settings SET value = '8801301806880' WHERE key = 'store_whatsapp'");
+
     if (isNewDatabase) {
       persistDb();
     }

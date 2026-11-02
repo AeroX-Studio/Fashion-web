@@ -107,7 +107,7 @@ async function seed({ bootstrap = false, initialized = false, resetProducts = fa
     run(
       `INSERT INTO users (name, email, phone, password_hash, role_id, user_type, status)
        VALUES (?, ?, ?, ?, ?, 'admin', 'active')`,
-      ['Admin', adminEmail, '09638044440', hashedPassword, superAdminRole ? superAdminRole.id : null]
+      ['Admin', adminEmail, '+8801301806880', hashedPassword, superAdminRole ? superAdminRole.id : null]
     );
     console.log('✅ Admin user created from configured environment credentials.');
   } else if (!existingAdmin) {
@@ -187,12 +187,12 @@ async function seed({ bootstrap = false, initialized = false, resetProducts = fa
     store_tagline: "Women's Fashion & Three-Piece in Bangladesh",
     store_description:
       'Shop Nobo Fashion for premium three-piece, gowns, sarees and unstitched dresses. 100% authentic, cash on delivery, fast nationwide delivery across Bangladesh.',
-    store_phone: '09638-044440, 09639-774962',
-    store_phone_complaints: '01800033220',
+    store_phone: '+880 1301-806880',
+    store_phone_complaints: '+880 1301-806880',
     store_email: 'info@nobofashion.com',
     store_address:
-      'Shop # 6, Basement, Uttara Square Shopping Mall, Sonargaon Janapath, Sector 13, Uttara, Dhaka',
-    store_whatsapp: '8801800033223',
+      'House 10, Road 1/A, Sector 9, Uttara, Dhaka, Bangladesh',
+    store_whatsapp: '8801301806880',
     store_currency: '৳',
     store_currency_code: 'BDT',
     store_logo: '/logo.jpg',

@@ -162,8 +162,8 @@ export default async function HomePage() {
                 <i className="ri-store-2-fill"></i>
               </div>
               <div className="showroom-trust-info">
-                <strong>Uttara Counter Selection</strong>
-                <p>Handpicked one piece at a time at Uttara Square Mall</p>
+                <strong>Uttara Showroom Selection</strong>
+                <p>Handpicked one piece at a time at Sector 9, Uttara</p>
               </div>
             </div>
 
@@ -369,12 +369,12 @@ export default async function HomePage() {
                 We are a counter before we are a website.
               </h2>
               <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.7, marginBottom: '16px' }}>
-                Nobo Fashion runs from a basement unit at Uttara Square, and it still works the same way it always
+                Nobo Fashion runs from our showroom at Sector 9, Uttara, and it still works the same way it always
                 has: one rail at a time, choosing pieces that hang properly and hold their colour. Nothing is
                 drop-shipped, and nothing goes online that has not been through the shop.
               </p>
               <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.7, marginBottom: '28px' }}>
-                The website exists so the same rail is available to everyone who cannot get to Sector 13 on a Thursday
+                The website exists so the same rail is available to everyone who cannot get to Sector 9 on a Thursday
                 evening.
               </p>
 
@@ -424,13 +424,13 @@ export default async function HomePage() {
             <div className="why-card">
               <i className="ri-store-3-line"></i>
               <h4>A Shop You Can Walk Into</h4>
-              <p>Shop # 6, Basement, Uttara Square Shopping Mall, Sector 13, Uttara, Dhaka. Easy returns &amp; exchange.</p>
+              <p>House 10, Road 1/A, Sector 9, Uttara, Dhaka, Bangladesh. Easy returns &amp; exchange.</p>
             </div>
 
             <div className="why-card">
               <i className="ri-customer-service-2-line"></i>
               <h4>Answered by a Person</h4>
-              <p>Call 09638-044440 or chat with us on Live Chat &amp; WhatsApp &mdash; answered directly by store staff.</p>
+              <p>Call or WhatsApp us at +880 1301-806880 &mdash; answered directly by store staff.</p>
             </div>
           </div>
         </div>
